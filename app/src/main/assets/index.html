@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>MedTimer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1115;--panel:#171a21;--panel2:#1e222b;--line:#2a2f3a;--text:#e8eaf0;--muted:#8b93a5;
+  --accent:#7c9cff;--kick:#5b6b8f;--ramp:#6f8cff;--peak:#8f7cff;--steady:#4fb6a0;--wear:#e0a458;--off:#3a3f4b;
+  --water:#4fb3e8;--eat:#f08a6c;--ok:#5fcf8f;--danger:#ef6b6b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.45}
+.wrap{max-width:880px;margin:0 auto;padding:24px 16px 120px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+h1{font-size:22px;margin:0;letter-spacing:-.01em}
+h1 span{color:var(--accent)}
+.sub{color:var(--muted);font-size:13px;margin-top:2px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px;font-weight:600}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}
+@media(max-width:640px){.grid{grid-template-columns:1fr 1fr}.grid .full{grid-column:1/-1}}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
+select,input{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:9px;padding:10px 11px;font:inherit}
+select:focus,input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+button{font:inherit;cursor:pointer;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:9px 14px;font-weight:500}
+button:hover{border-color:#3d4452}
+button.primary{background:var(--accent);border-color:var(--accent);color:#0b0d12;font-weight:600}
+button.primary:hover{filter:brightness(1.08)}
+button.small{padding:5px 10px;font-size:13px}
+button.ghost{background:transparent}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.hint{font-size:12.5px;color:var(--muted);margin-top:10px}
+.adjust{display:flex;align-items:center;gap:10px;margin-top:12px}
+.adjust input[type=range]{flex:1;padding:0;accent-color:var(--accent)}
+.adjust output{min-width:70px;text-align:right;font-size:13px;color:var(--muted)}
+
+/* dose cards */
+.dose{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 14px 12px;margin-bottom:12px}
+.dose-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.dose-name{font-weight:600;font-size:16px}
+.dose-meta{color:var(--muted);font-size:13px}
+.phase{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;margin-top:6px}
+.big{font-size:26px;font-weight:700;letter-spacing:-.02em;text-align:right;line-height:1.1}
+.big small{display:block;font-size:12px;color:var(--muted);font-weight:500;letter-spacing:0}
+.bar{position:relative;height:14px;border-radius:7px;overflow:hidden;display:flex;margin:14px 0 6px;background:var(--off)}
+.bar div{height:100%}
+.now{position:absolute;top:-4px;bottom:-4px;width:3px;background:#fff;border-radius:2px;box-shadow:0 0 0 2px var(--bg)}
+.ticks{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:4px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.nonstim{font-size:13px;color:var(--muted);margin-top:8px}
+
+/* reminders */
+.rem{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.rem:last-child{border-bottom:0}
+.rem .ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px;flex:none}
+.rem .t{font-variant-numeric:tabular-nums;font-weight:600;min-width:52px}
+.rem .txt{flex:1;min-width:0}
+.rem .txt b{font-weight:600;display:block}
+.rem .txt span{color:var(--muted);font-size:13px}
+.rem.done{opacity:.4}
+.rem.done b{text-decoration:line-through}
+.rem.due .t{color:var(--wear)}
+.rem.missed .t{color:var(--danger)}
+.empty{color:var(--muted);font-size:14px;padding:6px 0}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.two{grid-template-columns:1fr}}
+.water-n{font-size:40px;font-weight:700;color:var(--water);line-height:1}
+.glasses{display:flex;gap:5px;flex-wrap:wrap;margin:10px 0 12px}
+.glasses span{width:16px;height:22px;border:2px solid var(--water);border-top:0;border-radius:0 0 5px 5px;opacity:.35}
+.glasses span.f{background:var(--water);opacity:1}
+.log-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+.log-item:last-child{border:0}
+.tag{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.setting{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0}
+.setting select{width:auto}
+.notice{font-size:12.5px;color:var(--muted);border-left:3px solid var(--line);padding:2px 0 2px 10px;margin-top:4px}
+
+/* toast */
+#toasts{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);width:min(440px,calc(100% - 24px));display:flex;flex-direction:column;gap:10px;z-index:50}
+.toast{background:#232835;border:1px solid #3a4152;border-radius:14px;padding:14px;box-shadow:0 12px 32px rgba(0,0,0,.45);display:flex;gap:12px;align-items:flex-start;animation:pop .25s ease}
+.toast .ico{font-size:22px}
+.toast b{display:block}
+.toast span{color:var(--muted);font-size:13px}
+.toast .row{margin-top:10px}
+@keyframes pop{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+.foot{font-size:12px;color:var(--muted);text-align:center;margin-top:24px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Med<span>Timer</span></h1>
+      <div class="sub">How long your ADHD med lasts, plus reminders to eat and drink.</div>
+    </div>
+    <div class="row">
+      <span class="tag" id="clock">--:--</span>
+      <button class="small" id="notifBtn">🔔 Enable alerts</button>
+    </div>
+  </header>
+
+  <div class="card" id="exactWarn" style="display:none;border-color:var(--wear)">
+    <b>Allow exact alarms</b><div class="hint" style="margin:4px 0 10px">Without it, Android may deliver reminders late.</div>
+    <button class="small primary" onclick="Android.openExactSettings()">Open setting</button>
+  </div>
+
+  <!-- ADD DOSE -->
+  <div class="card">
+    <h2>Log a dose</h2>
+    <form id="doseForm">
+      <div class="grid">
+        <div class="full">
+          <label for="med">Medication</label>
+          <select id="med"></select>
+        </div>
+        <div>
+          <label for="mg">Dose (mg)</label>
+          <input id="mg" type="number" min="0" step="0.5" placeholder="e.g. 20" required>
+        </div>
+        <div>
+          <label for="time">Taken at</label>
+          <input id="time" type="time" required>
+        </div>
+      </div>
+      <div id="customBox" style="display:none" class="grid" >
+        <div class="full" style="margin-top:12px">
+          <label for="customName">Name</label>
+          <input id="customName" placeholder="My medication">
+        </div>
+        <div style="margin-top:12px">
+          <label for="customDur">Lasts (hours)</label>
+          <input id="customDur" type="number" min="1" max="24" step="0.5" value="8">
+        </div>
+        <div style="margin-top:12px">
+          <label for="customOnset">Kicks in after (min)</label>
+          <input id="customOnset" type="number" min="0" max="180" step="5" value="45">
+        </div>
+      </div>
+      <div class="adjust">
+        <label for="adj" style="margin:0;white-space:nowrap">How it lasts for me</label>
+        <input id="adj" type="range" min="-2" max="2" step="0.5" value="0">
+        <output id="adjOut">typical</output>
+      </div>
+      <div class="hint" id="medInfo"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="primary" type="submit">Start timer</button>
+        <button type="button" class="ghost" id="nowBtn">Set time to now</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ACTIVE -->
+  <div class="card">
+    <h2>Right now</h2>
+    <div id="active"></div>
+    <div class="legend">
+      <span><i style="background:var(--kick)"></i>Kicking in</span>
+      <span><i style="background:var(--ramp)"></i>Ramping up</span>
+      <span><i style="background:var(--peak)"></i>Peak</span>
+      <span><i style="background:var(--steady)"></i>Steady</span>
+      <span><i style="background:var(--wear)"></i>Wearing off</span>
+    </div>
+  </div>
+
+  <!-- REMINDERS -->
+  <div class="card">
+    <div class="row" style="justify-content:space-between;margin-bottom:6px">
+      <h2 style="margin:0">Reminders</h2>
+      <button class="small ghost" id="showAllBtn">Show done</button>
+    </div>
+    <div id="reminders"></div>
+  </div>
+
+  <div class="two">
+    <div class="card">
+      <h2>Water today</h2>
+      <div class="row" style="justify-content:space-between">
+        <div><span class="water-n" id="waterN">0</span> <span style="color:var(--muted)">glasses</span></div>
+        <div class="row">
+          <button class="small" id="waterMinus">−</button>
+          <button class="small primary" id="waterPlus">+1 glass</button>
+        </div>
+      </div>
+      <div class="glasses" id="glasses"></div>
+      <div class="hint" style="margin:0">Stimulants dry you out and hide thirst. Aim for 6–8 glasses.</div>
+    </div>
+    <div class="card">
+      <h2>Settings</h2>
+      <div class="setting"><span>Water reminder every</span>
+        <select id="waterInt"><option value="45">45 min</option><option value="60">1 h</option><option value="90">1 h 30</option><option value="120">2 h</option></select></div>
+      <div class="setting"><span>Sound with reminders</span>
+        <select id="sound"><option value="1">On</option><option value="0">Off</option></select></div>
+      <div class="setting"><span>Already ate when taking it</span>
+        <select id="ateFirst"><option value="0">Remind me to eat</option><option value="1">Skip that reminder</option></select></div>
+      <div class="notice" id="webNotice">Reminders pop up while this page is open in a tab. Keep it pinned during the day.</div>
+      <div id="nativeBox" style="display:none">
+        <div class="notice">Reminders arrive as phone notifications, even with the app closed. Tap <b>Done</b> or <b>Snooze</b> right in the notification.</div>
+        <button class="small" id="testBtn" style="margin-top:10px">Send a test notification (5 s)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between;margin-bottom:6px">
+      <h2 style="margin:0">Today's log</h2>
+      <button class="small ghost" id="clearBtn">Clear all</button>
+    </div>
+    <div id="log"></div>
+  </div>
+
+  <div class="foot">Durations are typical ranges from the drug labels; your own body and dose shift them. Use the slider to match what you actually feel. This doesn't replace what your doctor told you.</div>
+</div>
+<div id="toasts"></div>
+
+<script>
+/* ---------- medication data (hours) ---------- */
+const MEDS = {
+  // Methylphenidate
+  mph_ir:   {name:"Methylphenidate IR (Ritalin / Ritaline 10 mg)", g:"Methylphenidate", onset:.5, p1:1, p2:2.5, dur:4, range:"3–5 h"},
+  mph_la:   {name:"Ritalin LA / Ritaline LP", g:"Methylphenidate", onset:.5, p1:1.5, p2:6, dur:8, range:"6–8 h", note:"Two bumps: a morning one and a second around 4 h."},
+  medikinet:{name:"Medikinet (modified-release)", g:"Methylphenidate", onset:.5, p1:1.5, p2:5, dur:7.5, range:"6–8 h", note:"Works best taken with or after breakfast."},
+  quasym:   {name:"Quasym LP", g:"Methylphenidate", onset:.5, p1:1.5, p2:6, dur:8, range:"~8 h"},
+  concerta: {name:"Concerta / Concerta LP (OROS)", g:"Methylphenidate", onset:1, p1:2, p2:8, dur:11, range:"10–12 h", note:"Slow, smooth rise. Peak usually 6–8 h after."},
+  focalin_xr:{name:"Focalin XR (dexmethylphenidate)", g:"Methylphenidate", onset:.5, p1:1.5, p2:7, dur:11, range:"10–12 h"},
+  // Amphetamines
+  amph_ir:  {name:"Adderall IR", g:"Amphetamine", onset:.5, p1:1, p2:3, dur:5, range:"4–6 h"},
+  amph_xr:  {name:"Adderall XR", g:"Amphetamine", onset:.75, p1:2, p2:7, dur:11, range:"10–12 h"},
+  vyvanse:  {name:"Vyvanse / Elvanse (lisdexamfetamine)", g:"Amphetamine", onset:1.5, p1:3, p2:8, dur:12, range:"10–14 h", note:"Prodrug: kicks in slower, fades gently."},
+  dex_ir:   {name:"Dexamphetamine IR (Attentin, Dexedrine tabs)", g:"Amphetamine", onset:.5, p1:1, p2:3, dur:5, range:"4–6 h"},
+  mydayis:  {name:"Mydayis", g:"Amphetamine", onset:1, p1:3, p2:10, dur:15, range:"~14–16 h"},
+  // Non-stimulants
+  atx:      {name:"Atomoxetine (Strattera)", g:"Non-stimulant", nonstim:true, note:"Works all day, every day once built up (weeks). No wear-off timer, just the daily reminders."},
+  guan:     {name:"Guanfacine XR (Intuniv)", g:"Non-stimulant", nonstim:true, note:"Steady 24 h effect. Can make you sleepy or dizzy: stand up slowly and stay hydrated."},
+  custom:   {name:"Other / custom…", g:"Other"}
+};
+
+/* ---------- state ---------- */
+const KEY="medtimer_v1";
+let S = {doses:[], done:{}, fired:{}, snooze:{}, water:{}, settings:{water:60, sound:1, ateFirst:0}, lastMed:"concerta", lastMg:{}};
+const NATIVE = !!(window.Android && window.Android.schedule);
+try{
+  const raw = (NATIVE && Android.loadState()) || localStorage.getItem(KEY);
+  if(raw){ const d=JSON.parse(raw); S=Object.assign(S, d); S.settings=Object.assign({water:60, sound:1, ateFirst:0}, d.settings||{}); }
+}catch(e){}
+function save(){
+  const j=JSON.stringify(S);
+  try{ localStorage.setItem(KEY, j); }catch(e){}
+  if(NATIVE){ try{ Android.saveState(j); }catch(e){} }
+}
+
+const H=3600e3, M=60e3;
+const $=id=>document.getElementById(id);
+const fmt=t=>new Date(t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+const today=()=>new Date().toDateString();
+function dur(ms){ ms=Math.max(0,ms); const h=Math.floor(ms/H), m=Math.round((ms%H)/M); return h? `${h}h ${String(m).padStart(2,"0")}`:`${m} min`; }
+
+/* ---------- form ---------- */
+const sel=$("med"); const groups={};
+for(const [k,m] of Object.entries(MEDS)){
+  if(!groups[m.g]){ groups[m.g]=document.createElement("optgroup"); groups[m.g].label=m.g; sel.appendChild(groups[m.g]); }
+  const o=document.createElement("option"); o.value=k; o.textContent=m.name; groups[m.g].appendChild(o);
+}
+sel.value=S.lastMed in MEDS ? S.lastMed : "concerta";
+function setNow(){ const d=new Date(); $("time").value=`${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; }
+setNow();
+function adjLabel(v){ v=+v; return v===0?"typical":(v>0?`+${v} h`:`${v} h`); }
+function medInfo(){
+  const m=MEDS[sel.value];
+  $("customBox").style.display = sel.value==="custom" ? "grid":"none";
+  $("adj").parentElement.style.display = m.nonstim ? "none":"flex";
+  if(S.lastMg[sel.value] && !$("mg").value) $("mg").value=S.lastMg[sel.value];
+  let t="";
+  if(m.nonstim) t=m.note;
+  else if(sel.value!=="custom") t=`Typically lasts <b>${m.range}</b>, kicks in after ~${Math.round(m.onset*60)} min.` + (m.note?` ${m.note}`:"");
+  else t="Enter how long it usually lasts for you.";
+  $("medInfo").innerHTML=t;
+}
+sel.onchange=()=>{ $("mg").value=""; medInfo(); };
+$("adj").oninput=e=>$("adjOut").textContent=adjLabel(e.target.value);
+$("nowBtn").onclick=setNow;
+medInfo();
+
+$("doseForm").onsubmit=e=>{
+  e.preventDefault(); unlockAudio();
+  const key=sel.value, base=MEDS[key];
+  const [hh,mm]=$("time").value.split(":").map(Number);
+  const d=new Date(); d.setHours(hh,mm,0,0);
+  if(d.getTime()-Date.now()>3*H) d.setDate(d.getDate()-1); // e.g. 23:50 logged after midnight
+  let prof;
+  if(key==="custom"){
+    const D=Math.max(1,+$("customDur").value||8), on=Math.max(0,(+$("customOnset").value||45)/60);
+    prof={name:$("customName").value.trim()||"Custom med", onset:on, p1:on+ (D*.12), p2:D*.65, dur:D};
+  } else prof={...base};
+  const adj=+$("adj").value;
+  if(!prof.nonstim && adj){ const f=(prof.dur+adj)/prof.dur; prof.p1*=f; prof.p2*=f; prof.dur+=adj; }
+  const dose={id:Date.now().toString(36), key, mg:+$("mg").value, t:d.getTime(), prof, adj};
+  S.doses.push(dose); S.lastMed=key; S.lastMg[key]=dose.mg;
+  save(); render();
+  toast("✅", `Timer started: ${prof.name.split(" (")[0]} ${dose.mg} mg`, prof.nonstim? "Daily reminders added." : `Should last until about ${fmt(dose.t+prof.dur*H)}.`);
+};
+
+/* ---------- phases & reminders ---------- */
+function phases(p){
+  const wear=Math.max(p.p2, p.dur-1);
+  return [
+    {k:"Kicking in", c:"var(--kick)", a:0, b:p.onset},
+    {k:"Ramping up", c:"var(--ramp)", a:p.onset, b:p.p1},
+    {k:"Peak", c:"var(--peak)", a:p.p1, b:p.p2},
+    {k:"Steady", c:"var(--steady)", a:p.p2, b:wear},
+    {k:"Wearing off", c:"var(--wear)", a:wear, b:p.dur}
+  ].filter(x=>x.b>x.a);
+}
+function currentPhase(dose, now){
+  const h=(now-dose.t)/H;
+  if(h<0) return {k:"Not taken yet", c:"var(--off)"};
+  if(h>=dose.prof.dur) return {k:"Worn off", c:"var(--off)"};
+  return phases(dose.prof).find(x=>h>=x.a && h<x.b) || {k:"Active", c:"var(--steady)"};
+}
+function remindersFor(dose){
+  const p=dose.prof, t0=dose.t, out=[], short=p.nonstim?false:p.dur<6.5;
+  const add=(i,kind,offH,title,sub)=>out.push({id:`${dose.id}-${kind}-${i}`, t:t0+offH*H, kind, title, sub, dose:dose.id});
+  const nm=p.name.split(" (")[0].split(" / ")[0];
+  if(!S.settings.ateFirst) add(0,"eat",0,"Eat breakfast now","Protein + something real before your appetite drops.");
+  if(p.nonstim){
+    for(let i=1;i<=3;i++) add(i,"water",i*3,"Drink a glass of water","Stay hydrated through the day.");
+    add(1,"eat",4.5,"Lunch time","Regular meals help with side effects.");
+    return out;
+  }
+  // water during active window
+  const iv=S.settings.water/60; let i=1;
+  for(let h=iv; h<p.dur-0.25; h+=iv, i++) add(i,"water",h,"Drink a glass of water",`${nm} hides thirst. Small sips count.`);
+  // meals
+  if(short){
+    add(1,"eat",Math.max(p.dur-0.75, p.onset+1),"Eat while it's fading","Appetite is coming back. Good window for a meal.");
+  } else {
+    const lunch=Math.min(4.5, p.dur*0.42);
+    add(1,"eat",lunch,"Eat lunch, even if you're not hungry","Appetite is lowest now. Go small: yogurt, a sandwich, a smoothie.");
+    if(p.dur>=9) add(2,"snack",lunch+3.25,"Snack break","Nuts, fruit, cheese… keeps you from crashing later.");
+  }
+  add(9,"wear",Math.max(p.dur-0.75, p.p2),"Wearing off soon","Have a real meal and some water to soften the rebound / comedown.");
+  add(10,"off",p.dur,`${nm} has worn off`,"Eat properly if you haven't. Wind down for sleep later.");
+  return out;
+}
+function allReminders(){ return S.doses.flatMap(remindersFor).map(r=>({...r, t:S.snooze[r.id]||r.t})).sort((a,b)=>a.t-b.t); }
+const ICON={eat:["🍽️","var(--eat)"], snack:["🥜","var(--eat)"], water:["💧","var(--water)"], wear:["🌇","var(--wear)"], off:["🌙","var(--kick)"]};
+
+/* ---------- render ---------- */
+let showDone=false;
+function render(){
+  const now=Date.now();
+  // prune old doses (>30h)
+  S.doses=S.doses.filter(d=>now-d.t < 30*H);
+  $("clock").textContent=fmt(now);
+
+  // active
+  const act=$("active"); act.innerHTML="";
+  const live=S.doses.filter(d=>d.prof.nonstim ? now-d.t<24*H : now-d.t < d.prof.dur*H+2*H);
+  if(!live.length) act.innerHTML=`<div class="empty">No active dose. Log one above to start the timer.</div>`;
+  for(const d of live){
+    const p=d.prof, ph=currentPhase(d,now), el=document.createElement("div"); el.className="dose";
+    if(p.nonstim){
+      el.innerHTML=`<div class="dose-top"><div><div class="dose-name">${p.name}</div><div class="dose-meta">${d.mg} mg · taken ${fmt(d.t)}</div>
+        <span class="phase" style="background:rgba(79,182,160,.15);color:var(--steady)">All-day effect</span></div></div><div class="nonstim">${MEDS[d.key]?.note||""}</div>`;
+    } else {
+      const total=p.dur, h=(now-d.t)/H, left=d.t+total*H-now;
+      const segs=phases(p).map(x=>`<div style="width:${(x.b-x.a)/total*100}%;background:${x.c}"></div>`).join("");
+      const pos=Math.min(100,Math.max(0,h/total*100));
+      const big = h<0 ? `${dur(d.t-now)}<small>until taken</small>` : left>0 ? `${dur(left)}<small>left</small>` : `Done<small>ended ${fmt(d.t+total*H)}</small>`;
+      const nextPh = phases(p).find(x=>x.a>h);
+      el.innerHTML=`<div class="dose-top"><div><div class="dose-name">${p.name.split(" (")[0]}</div>
+        <div class="dose-meta">${d.mg} mg · taken ${fmt(d.t)}${d.adj?` · ${adjLabel(d.adj)}`:""}</div>
+        <span class="phase" style="background:color-mix(in srgb, ${ph.c} 22%, transparent);color:${ph.c==="var(--off)"?"var(--muted)":ph.c}">${ph.k}</span>
+        ${nextPh&&h>=0?`<span class="dose-meta" style="margin-left:6px">→ ${nextPh.k.toLowerCase()} at ${fmt(d.t+nextPh.a*H)}</span>`:""}</div>
+        <div class="big">${big}</div></div>
+        <div class="bar">${segs}${h>=0&&h<=total?`<span class="now" style="left:calc(${pos}% - 1.5px)"></span>`:""}</div>
+        <div class="ticks"><span>${fmt(d.t)}</span><span>peak ${fmt(d.t+p.p1*H)}–${fmt(d.t+p.p2*H)}</span><span>${fmt(d.t+total*H)}</span></div>`;
+    }
+    act.appendChild(el);
+  }
+
+  // reminders
+  const box=$("reminders"); box.innerHTML="";
+  let rs=allReminders().filter(r=> r.t > now-6*H);
+  if(!showDone) rs=rs.filter(r=>!S.done[r.id]);
+  if(!rs.length) box.innerHTML=`<div class="empty">${S.doses.length?"All caught up 🎉":"Reminders appear here once you log a dose."}</div>`;
+  for(const r of rs.slice(0,14)){
+    const [ic,col]=ICON[r.kind]; const done=S.done[r.id];
+    const state = done?"done": r.t<=now ? (now-r.t>45*M?"missed":"due") : "";
+    const row=document.createElement("div"); row.className="rem "+state;
+    row.innerHTML=`<div class="ico" style="background:color-mix(in srgb, ${col} 18%, transparent)">${ic}</div>
+      <div class="t">${fmt(r.t)}</div>
+      <div class="txt"><b>${r.title}</b><span>${state==="due"?"Now · ":state==="missed"?"Missed · ":r.t>now?`in ${dur(r.t-now)} · `:""}${r.sub}</span></div>`;
+    const b=document.createElement("button"); b.className="small"+(done?" ghost":"");
+    b.textContent=done?"Undo":"Done";
+    b.onclick=()=>{ if(done) delete S.done[r.id]; else { S.done[r.id]=1; if(r.kind==="water") addWater(1,true); } save(); render(); };
+    row.appendChild(b); box.appendChild(row);
+  }
+
+  // water
+  const w=S.water[today()]||0; $("waterN").textContent=w;
+  $("glasses").innerHTML=Array.from({length:Math.max(8,w)},(_,i)=>`<span class="${i<w?"f":""}"></span>`).join("");
+
+  // log
+  const lg=$("log"); const todays=S.doses.filter(d=>new Date(d.t).toDateString()===today() || now-d.t<16*H).sort((a,b)=>a.t-b.t);
+  lg.innerHTML = todays.length? "" : `<div class="empty">Nothing logged today.</div>`;
+  for(const d of todays){
+    const it=document.createElement("div"); it.className="log-item";
+    it.innerHTML=`<span><b>${fmt(d.t)}</b> &nbsp;${d.prof.name.split(" (")[0]} · ${d.mg} mg</span>`;
+    const b=document.createElement("button"); b.className="small ghost"; b.textContent="Remove";
+    b.onclick=()=>{ S.doses=S.doses.filter(x=>x.id!==d.id); save(); render(); };
+    it.appendChild(b); lg.appendChild(it);
+  }
+  syncNative();
+}
+$("showAllBtn").onclick=e=>{ showDone=!showDone; e.target.textContent=showDone?"Hide done":"Show done"; render(); };
+$("clearBtn").onclick=e=>{
+  if(e.target.dataset.armed){ S.doses=[]; S.done={}; S.fired={}; S.snooze={}; save(); render(); e.target.textContent="Clear all"; delete e.target.dataset.armed; }
+  else { e.target.dataset.armed=1; e.target.textContent="Tap again to confirm"; setTimeout(()=>{ e.target.textContent="Clear all"; delete e.target.dataset.armed; },3000); }
+};
+
+/* ---------- water ---------- */
+function addWater(n, silent){ const k=today(); S.water[k]=Math.max(0,(S.water[k]||0)+n); save(); if(!silent) render(); }
+$("waterPlus").onclick=()=>{ addWater(1);
+  const r=allReminders().find(r=>r.kind==="water" && !S.done[r.id] && Math.abs(r.t-Date.now())<30*M); if(r){S.done[r.id]=1; save(); render();} };
+$("waterMinus").onclick=()=>addWater(-1);
+
+/* ---------- settings ---------- */
+$("waterInt").value=S.settings.water; $("sound").value=S.settings.sound; $("ateFirst").value=S.settings.ateFirst;
+$("waterInt").onchange=e=>{ S.settings.water=+e.target.value; save(); render(); };
+$("sound").onchange=e=>{ S.settings.sound=+e.target.value; save(); };
+$("ateFirst").onchange=e=>{ S.settings.ateFirst=+e.target.value; save(); render(); };
+
+/* ---------- native (Android) ---------- */
+let lastSync="";
+function syncNative(){
+  if(!NATIVE) return;
+  const now=Date.now();
+  const list=allReminders().filter(r=>!S.done[r.id] && r.t>now && r.t-now<36*H)
+    .map(r=>({id:r.id, t:Math.round(r.t), title:`${ICON[r.kind][0]} ${r.title}`, body:r.sub}));
+  const j=JSON.stringify(list);
+  if(j!==lastSync){ lastSync=j; try{ Android.schedule(j); }catch(e){} }
+}
+function nativeStatus(){
+  if(!NATIVE) return;
+  let st={notif:true, exact:true}; try{ st=JSON.parse(Android.status()); }catch(e){}
+  $("notifBtn").textContent = st.notif ? "🔔 Notifications on" : "🔕 Turn on notifications";
+  $("notifBtn").classList.toggle("primary", !st.notif);
+  $("exactWarn").style.display = st.exact ? "none" : "block";
+}
+window.onAppResume=function(){
+  if(!NATIVE) return;
+  try{
+    const ev=JSON.parse(Android.pullEvents()||"[]");
+    for(const e of ev){
+      if(e.type==="done"){ if(!S.done[e.id]){ S.done[e.id]=1; if(e.id.includes("-water-")) addWater(1,true); } }
+      if(e.type==="snooze"){ S.snooze[e.id]=e.t; }
+    }
+    if(ev.length) save();
+  }catch(e){}
+  nativeStatus(); render();
+};
+
+/* ---------- alerts ---------- */
+let actx=null;
+function unlockAudio(){ try{ if(!actx){ actx=new (window.AudioContext||window.webkitAudioContext)(); } if(actx.state==="suspended") actx.resume(); }catch(e){} }
+document.addEventListener("pointerdown", unlockAudio, {once:true});
+function beep(){
+  if(!S.settings.sound||!actx) return;
+  try{ [0,0.18].forEach((o,i)=>{ const os=actx.createOscillator(), g=actx.createGain(); os.type="sine"; os.frequency.value=i?880:660;
+    g.gain.setValueAtTime(0.0001,actx.currentTime+o); g.gain.exponentialRampToValueAtTime(0.18,actx.currentTime+o+0.02); g.gain.exponentialRampToValueAtTime(0.0001,actx.currentTime+o+0.25);
+    os.connect(g).connect(actx.destination); os.start(actx.currentTime+o); os.stop(actx.currentTime+o+0.3); }); }catch(e){}
+}
+$("notifBtn").onclick=async()=>{
+  if(NATIVE){ Android.requestNotif(); return; }
+  unlockAudio(); beep();
+  try{
+    if(!("Notification" in window)) throw 0;
+    const p = await Notification.requestPermission();
+    if(p==="granted"){ $("notifBtn").textContent="🔔 Alerts on"; new Notification("MedTimer", {body:"System notifications are on."}); }
+    else throw 0;
+  }catch(e){ $("notifBtn").textContent="🔔 Sound + pop-ups on"; toast("🔔","Alerts are on in this page","Your browser blocked system notifications here, so reminders show as pop-ups with a sound. Keep this tab open."); }
+};
+function toast(ic,title,sub,rem){
+  const t=document.createElement("div"); t.className="toast";
+  t.innerHTML=`<div class="ico">${ic}</div><div style="flex:1"><b>${title}</b><span>${sub}</span>${rem?`<div class="row"></div>`:""}</div>`;
+  if(rem){
+    const row=t.querySelector(".row");
+    const d=document.createElement("button"); d.className="small primary"; d.textContent="Done";
+    d.onclick=()=>{ S.done[rem.id]=1; if(rem.kind==="water") addWater(1,true); save(); render(); t.remove(); };
+    const s=document.createElement("button"); s.className="small"; s.textContent="Snooze 10 min";
+    s.onclick=()=>{ S.snooze[rem.id]=Date.now()+10*M; delete S.fired[rem.id]; save(); render(); t.remove(); };
+    row.append(d,s);
+  } else setTimeout(()=>t.remove(),6000);
+  $("toasts").appendChild(t);
+  if(rem) setTimeout(()=>t.remove(), 5*60e3);
+}
+function tick(){
+  const now=Date.now();
+  for(const r of allReminders()){
+    if(S.done[r.id]) continue;
+    const key=r.id+"@"+r.t;
+    if(!NATIVE && r.t<=now && now-r.t<30*M && !S.fired[key]){
+      S.fired[key]=1; save();
+      const [ic]=ICON[r.kind];
+      toast(ic, r.title, r.sub, r); beep();
+      try{ if(window.Notification && Notification.permission==="granted") new Notification(`${ic} ${r.title}`, {body:r.sub}); }catch(e){}
+    }
+  }
+  render();
+}
+if(NATIVE){
+  $("webNotice").style.display="none"; $("nativeBox").style.display="block";
+  $("testBtn").onclick=()=>{ Android.testNotif(); toast("🔔","Test sent","A notification should appear in about 5 seconds."); };
+  document.querySelector(".foot").insertAdjacentHTML("beforeend","");
+  window.onAppResume();
+}
+render(); setInterval(tick, 20e3); setTimeout(tick, 1500);
+</script>
+</body>
+</html>
