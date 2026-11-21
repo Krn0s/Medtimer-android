@@ -3,27 +3,32 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>MedTimer</title>
+<title>Med Timer — ADHD meds, meals & water</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0f1115;--panel:#171a21;--panel2:#1e222b;--line:#2a2f3a;--text:#e8eaf0;--muted:#8b93a5;
   --accent:#7c9cff;--kick:#5b6b8f;--ramp:#6f8cff;--peak:#8f7cff;--steady:#4fb6a0;--wear:#e0a458;--off:#3a3f4b;
-  --water:#4fb3e8;--eat:#f08a6c;--ok:#5fcf8f;--danger:#ef6b6b;
+  --water:#4fb3e8;--eat:#f08a6c;--caf:#d9a066;--bed:#b48cff;--ok:#5fcf8f;--mid:#e6c35c;--danger:#ef6b6b;
 }
 *{box-sizing:border-box}
+html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.45}
-.wrap{max-width:880px;margin:0 auto;padding:24px 16px 120px}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.wrap{max-width:880px;margin:0 auto;padding:16px 16px 120px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:4px 0 14px}
 h1{font-size:22px;margin:0;letter-spacing:-.01em}
 h1 span{color:var(--accent)}
-.sub{color:var(--muted);font-size:13px;margin-top:2px}
-h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px;font-weight:600}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+h2{font-size:12.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px;font-weight:600}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
 .grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}
 @media(max-width:640px){.grid{grid-template-columns:1fr 1fr}.grid .full{grid-column:1/-1}}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:680px){.two{grid-template-columns:1fr}}
 label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
 select,input{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:9px;padding:10px 11px;font:inherit}
+input[type=number]{-moz-appearance:textfield}
 select:focus,input:focus{outline:2px solid var(--accent);outline-offset:-1px}
 button{font:inherit;cursor:pointer;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:9px 14px;font-weight:500}
 button:hover{border-color:#3d4452}
@@ -31,56 +36,101 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#0b0d12
 button.primary:hover{filter:brightness(1.08)}
 button.small{padding:5px 10px;font-size:13px}
 button.ghost{background:transparent}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.hint{font-size:12.5px;color:var(--muted);margin-top:10px}
-.adjust{display:flex;align-items:center;gap:10px;margin-top:12px}
-.adjust input[type=range]{flex:1;padding:0;accent-color:var(--accent)}
-.adjust output{min-width:70px;text-align:right;font-size:13px;color:var(--muted)}
+button.link{background:none;border:0;padding:0;color:var(--accent);font-size:13px}
+.hint{font-size:12.5px;color:var(--muted);margin-top:8px}
+.muted{color:var(--muted)}
+.tag{font-size:12px;padding:3px 9px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
 
-/* dose cards */
-.dose{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 14px 12px;margin-bottom:12px}
-.dose-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.dose-name{font-weight:600;font-size:16px}
-.dose-meta{color:var(--muted);font-size:13px}
-.phase{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;margin-top:6px}
-.big{font-size:26px;font-weight:700;letter-spacing:-.02em;text-align:right;line-height:1.1}
-.big small{display:block;font-size:12px;color:var(--muted);font-weight:500;letter-spacing:0}
-.bar{position:relative;height:14px;border-radius:7px;overflow:hidden;display:flex;margin:14px 0 6px;background:var(--off)}
-.bar div{height:100%}
-.now{position:absolute;top:-4px;bottom:-4px;width:3px;background:#fff;border-radius:2px;box-shadow:0 0 0 2px var(--bg)}
-.ticks{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted)}
-.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:4px}
-.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
-.nonstim{font-size:13px;color:var(--muted);margin-top:8px}
+/* tabs */
+.tabs{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:14px;position:sticky;top:8px;z-index:20}
+.tabs a{flex:1;text-align:center;padding:8px 6px;border-radius:9px;color:var(--muted);text-decoration:none;font-weight:600;font-size:14px}
+.tabs a.on{background:var(--panel2);color:var(--text)}
+.view{display:none}.view.on{display:block}
+
+/* usual button */
+.usual{width:100%;display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:14px;background:linear-gradient(135deg,#7c9cff,#8f7cff);border:0;color:#0b0d12;text-align:left;margin-bottom:10px}
+.usual .pill{font-size:26px}
+.usual b{display:block;font-size:17px}
+.usual span{font-size:13px;opacity:.8}
+.usual:hover{filter:brightness(1.06)}
+
+/* banners */
+.banner{border-radius:12px;padding:12px 14px;margin-bottom:12px;display:flex;gap:12px;align-items:center;border:1px solid}
+.banner.warn{background:rgba(224,164,88,.1);border-color:rgba(224,164,88,.45)}
+.banner.bad{background:rgba(239,107,107,.1);border-color:rgba(239,107,107,.45)}
+.banner .ico{font-size:20px}
+.banner .txt{flex:1;font-size:14px}
+.banner .txt b{display:block}
+
+/* effect */
+.big{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.05}
+.big small{font-size:13px;color:var(--muted);font-weight:500;letter-spacing:0;margin-left:4px}
+.phase{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px}
+svg.chart{width:100%;height:auto;display:block;margin:12px 0 4px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:3px;border-radius:2px;margin-right:5px;vertical-align:3px}
+.check{font-size:13.5px;margin-top:6px}
+.dose-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+.dose-row .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.dose-row .grow{flex:1;min-width:0}
+.dose-row small{color:var(--muted)}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 11px;border-radius:99px;font-size:13px;background:var(--panel2);border:1px solid var(--line);color:var(--text)}
+.chip.on{background:rgba(124,156,255,.18);border-color:var(--accent);color:#fff}
+.q{margin:12px 0 6px;font-size:13px;color:var(--muted);font-weight:500}
 
 /* reminders */
 .rem{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
 .rem:last-child{border-bottom:0}
 .rem .ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px;flex:none}
-.rem .t{font-variant-numeric:tabular-nums;font-weight:600;min-width:52px}
+.rem .t{font-variant-numeric:tabular-nums;font-weight:600;min-width:48px}
 .rem .txt{flex:1;min-width:0}
 .rem .txt b{font-weight:600;display:block}
 .rem .txt span{color:var(--muted);font-size:13px}
-.rem.done{opacity:.4}
-.rem.done b{text-decoration:line-through}
-.rem.due .t{color:var(--wear)}
-.rem.missed .t{color:var(--danger)}
-.empty{color:var(--muted);font-size:14px;padding:6px 0}
+.rem.done{opacity:.4}.rem.done b{text-decoration:line-through}
+.rem.due .t{color:var(--wear)}.rem.missed .t{color:var(--danger)}
+.empty{color:var(--muted);font-size:14px;padding:4px 0}
 
-.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:640px){.two{grid-template-columns:1fr}}
-.water-n{font-size:40px;font-weight:700;color:var(--water);line-height:1}
-.glasses{display:flex;gap:5px;flex-wrap:wrap;margin:10px 0 12px}
-.glasses span{width:16px;height:22px;border:2px solid var(--water);border-top:0;border-radius:0 0 5px 5px;opacity:.35}
+/* water & caffeine */
+.water-n{font-size:38px;font-weight:700;color:var(--water);line-height:1}
+.caf-n{font-size:38px;font-weight:700;color:var(--caf);line-height:1}
+.glasses{display:flex;gap:5px;flex-wrap:wrap;margin:10px 0 10px}
+.glasses span{width:15px;height:21px;border:2px solid var(--water);border-top:0;border-radius:0 0 5px 5px;opacity:.35}
 .glasses span.f{background:var(--water);opacity:1}
-.log-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
-.log-item:last-child{border:0}
-.tag{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
-.setting{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0}
-.setting select{width:auto}
-.notice{font-size:12.5px;color:var(--muted);border-left:3px solid var(--line);padding:2px 0 2px 10px;margin-top:4px}
+.cafbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+.cafbtns button{padding:7px 4px;font-size:12.5px;line-height:1.2}
+.cafbtns button small{display:block;color:var(--muted);font-size:11px}
+.mini{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:4px 0;color:var(--muted)}
 
-/* toast */
+/* settings */
+.setting{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.setting:last-child{border-bottom:0}
+.setting select,.setting input{width:auto;min-width:110px}
+.stock{padding:10px 0;border-bottom:1px solid var(--line)}
+.stock:last-child{border-bottom:0}
+.stock .row input{width:90px}
+
+/* history */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal .hd{font-size:11px;color:var(--muted);text-align:center;padding-bottom:2px}
+.day{aspect-ratio:1/1;border-radius:9px;background:var(--panel2);border:1px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;cursor:pointer;position:relative;padding:0}
+.day.out{opacity:.25;cursor:default}
+.day.took{background:rgba(124,156,255,.22)}
+.day.today{border-color:var(--accent)}
+.day.sel{outline:2px solid #fff;outline-offset:1px}
+.day .fd{width:6px;height:6px;border-radius:50%;margin-top:3px}
+.day .wn{font-size:9.5px;color:var(--water);margin-top:1px}
+.stat{background:var(--panel2);border-radius:10px;padding:12px}
+.stat b{display:block;font-size:22px}
+.stat span{font-size:12px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
+.detail-item{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+.detail-item:last-child{border:0}
+
+/* toast & dialog */
 #toasts{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);width:min(440px,calc(100% - 24px));display:flex;flex-direction:column;gap:10px;z-index:50}
 .toast{background:#232835;border:1px solid #3a4152;border-radius:14px;padding:14px;box-shadow:0 12px 32px rgba(0,0,0,.45);display:flex;gap:12px;align-items:flex-start;animation:pop .25s ease}
 .toast .ico{font-size:22px}
@@ -88,223 +138,325 @@ button.ghost{background:transparent}
 .toast span{color:var(--muted);font-size:13px}
 .toast .row{margin-top:10px}
 @keyframes pop{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
-.foot{font-size:12px;color:var(--muted);text-align:center;margin-top:24px}
+#dlg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
+#dlg.on{display:flex}
+#dlg .box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:420px;width:100%}
+#dlg h3{margin:0 0 6px;font-size:17px}
+#dlg p{margin:0 0 16px;color:var(--muted);font-size:14px}
+.sync{font-size:12px}
+.foot{font-size:12px;color:var(--muted);text-align:center;margin-top:20px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div>
-      <h1>Med<span>Timer</span></h1>
-      <div class="sub">How long your ADHD med lasts, plus reminders to eat and drink.</div>
-    </div>
+    <h1>Med<span>Timer</span></h1>
     <div class="row">
+      <span class="tag sync" id="syncTag" title="Where your data is saved">💾 This device</span>
       <span class="tag" id="clock">--:--</span>
-      <button class="small" id="notifBtn">🔔 Enable alerts</button>
     </div>
   </header>
 
-  <div class="card" id="exactWarn" style="display:none;border-color:var(--wear)">
-    <b>Allow exact alarms</b><div class="hint" style="margin:4px 0 10px">Without it, Android may deliver reminders late.</div>
-    <button class="small primary" onclick="Android.openExactSettings()">Open setting</button>
-  </div>
+  <nav class="tabs">
+    <a href="#today" data-v="today">Today</a>
+    <a href="#history" data-v="history">History</a>
+    <a href="#settings" data-v="settings">Settings</a>
+  </nav>
 
-  <!-- ADD DOSE -->
-  <div class="card">
-    <h2>Log a dose</h2>
-    <form id="doseForm">
-      <div class="grid">
-        <div class="full">
-          <label for="med">Medication</label>
-          <select id="med"></select>
-        </div>
-        <div>
-          <label for="mg">Dose (mg)</label>
-          <input id="mg" type="number" min="0" step="0.5" placeholder="e.g. 20" required>
-        </div>
-        <div>
-          <label for="time">Taken at</label>
-          <input id="time" type="time" required>
-        </div>
-      </div>
-      <div id="customBox" style="display:none" class="grid" >
-        <div class="full" style="margin-top:12px">
-          <label for="customName">Name</label>
-          <input id="customName" placeholder="My medication">
-        </div>
-        <div style="margin-top:12px">
-          <label for="customDur">Lasts (hours)</label>
-          <input id="customDur" type="number" min="1" max="24" step="0.5" value="8">
-        </div>
-        <div style="margin-top:12px">
-          <label for="customOnset">Kicks in after (min)</label>
-          <input id="customOnset" type="number" min="0" max="180" step="5" value="45">
-        </div>
-      </div>
-      <div class="adjust">
-        <label for="adj" style="margin:0;white-space:nowrap">How it lasts for me</label>
-        <input id="adj" type="range" min="-2" max="2" step="0.5" value="0">
-        <output id="adjOut">typical</output>
-      </div>
-      <div class="hint" id="medInfo"></div>
-      <div class="row" style="margin-top:14px">
-        <button class="primary" type="submit">Start timer</button>
-        <button type="button" class="ghost" id="nowBtn">Set time to now</button>
-      </div>
-    </form>
-  </div>
+  <!-- ===================== TODAY ===================== -->
+  <section class="view" id="v-today">
+    <div id="banners"></div>
 
-  <!-- ACTIVE -->
-  <div class="card">
-    <h2>Right now</h2>
-    <div id="active"></div>
-    <div class="legend">
-      <span><i style="background:var(--kick)"></i>Kicking in</span>
-      <span><i style="background:var(--ramp)"></i>Ramping up</span>
-      <span><i style="background:var(--peak)"></i>Peak</span>
-      <span><i style="background:var(--steady)"></i>Steady</span>
-      <span><i style="background:var(--wear)"></i>Wearing off</span>
+    <button class="usual" id="usualBtn" style="display:none">
+      <span class="pill">💊</span>
+      <div style="flex:1"><b id="usualTitle">Took my usual</b><span id="usualSub"></span></div>
+      <span style="font-size:20px">→</span>
+    </button>
+    <div class="row between" style="margin-bottom:14px">
+      <button class="link" id="toggleForm">+ Log a different dose</button>
     </div>
-  </div>
 
-  <!-- REMINDERS -->
-  <div class="card">
-    <div class="row" style="justify-content:space-between;margin-bottom:6px">
-      <h2 style="margin:0">Reminders</h2>
-      <button class="small ghost" id="showAllBtn">Show done</button>
+    <div class="card" id="formCard" style="display:none">
+      <h2>Log a dose</h2>
+      <form id="doseForm">
+        <div class="grid">
+          <div class="full"><label for="med">Medication</label><select id="med"></select></div>
+          <div><label for="mg">Dose (mg)</label><input id="mg" type="number" min="0" step="0.5" inputmode="decimal" placeholder="e.g. 20" required></div>
+          <div><label for="time">Taken at</label><input id="time" type="time" required></div>
+        </div>
+        <div id="customBox" style="display:none" class="grid">
+          <div class="full" style="margin-top:12px"><label for="customName">Name</label><input id="customName" placeholder="My medication"></div>
+          <div style="margin-top:12px"><label for="customDur">Lasts (hours)</label><input id="customDur" type="number" min="1" max="24" step="0.5" value="8"></div>
+          <div style="margin-top:12px"><label for="customOnset">Kicks in after (min)</label><input id="customOnset" type="number" min="0" max="180" step="5" value="45"></div>
+        </div>
+        <div class="row" id="adjRow" style="margin-top:14px;flex-wrap:nowrap">
+          <label for="adj" style="margin:0;white-space:nowrap">How it lasts for me</label>
+          <input id="adj" type="range" min="-3" max="3" step="0.5" value="0" style="flex:1;padding:0;accent-color:var(--accent)">
+          <output id="adjOut" class="muted" style="min-width:64px;text-align:right;font-size:13px">typical</output>
+        </div>
+        <div class="hint" id="medInfo"></div>
+        <div class="hint" id="learnInfo" style="color:var(--steady)"></div>
+        <div class="row" style="margin-top:14px">
+          <button class="primary" type="submit">Start timer</button>
+          <button type="button" class="ghost" id="nowBtn">Set time to now</button>
+        </div>
+      </form>
     </div>
-    <div id="reminders"></div>
-  </div>
 
-  <div class="two">
+    <div class="card" id="checkinCard" style="display:none"></div>
+
     <div class="card">
-      <h2>Water today</h2>
-      <div class="row" style="justify-content:space-between">
-        <div><span class="water-n" id="waterN">0</span> <span style="color:var(--muted)">glasses</span></div>
-        <div class="row">
-          <button class="small" id="waterMinus">−</button>
-          <button class="small primary" id="waterPlus">+1 glass</button>
+      <div class="row between" style="align-items:flex-start">
+        <div>
+          <h2 style="margin-bottom:6px">Effect right now</h2>
+          <div id="effBig" class="big">—</div>
+          <div id="effPhase" style="margin-top:6px"></div>
         </div>
+        <div style="text-align:right" id="effSide"></div>
       </div>
-      <div class="glasses" id="glasses"></div>
-      <div class="hint" style="margin:0">Stimulants dry you out and hide thirst. Aim for 6–8 glasses.</div>
+      <div id="chartBox"></div>
+      <div class="legend" id="legend">
+        <span><i style="background:var(--accent)"></i>Med effect</span>
+        <span><i style="background:var(--caf)"></i>Caffeine</span>
+        <span><i style="background:var(--bed)"></i>Bedtime</span>
+        <span><i style="background:#fff"></i>Now</span>
+      </div>
+      <div id="sleepCheck"></div>
+      <div id="doseList" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
+      <div class="row between" style="margin-bottom:6px">
+        <h2 style="margin:0">Reminders</h2>
+        <button class="small ghost" id="showAllBtn">Show done</button>
+      </div>
+      <div id="reminders"></div>
+    </div>
+
+    <div class="two">
+      <div class="card">
+        <h2>Water today</h2>
+        <div class="row between">
+          <div><span class="water-n" id="waterN">0</span> <span class="muted">glasses</span></div>
+          <div class="row"><button class="small" id="waterMinus">−</button><button class="small primary" id="waterPlus">+1 glass</button></div>
+        </div>
+        <div class="glasses" id="glasses"></div>
+        <div class="hint" style="margin:0">Stimulants dry you out and hide thirst. Aim for 6–8 glasses.</div>
+      </div>
+      <div class="card">
+        <h2>Caffeine today</h2>
+        <div><span class="caf-n" id="cafN">0</span> <span class="muted">mg</span></div>
+        <div class="cafbtns" id="cafBtns"></div>
+        <div class="row" style="flex-wrap:nowrap">
+          <input id="cafCustom" type="number" min="1" max="600" inputmode="numeric" placeholder="Other (mg)">
+          <button class="small" id="cafAdd">Add</button>
+        </div>
+        <div id="cafList" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HISTORY ===================== -->
+  <section class="view" id="v-history">
+    <div class="card">
+      <div class="row between" style="margin-bottom:12px">
+        <button class="small" id="calPrev">‹</button>
+        <b id="calTitle"></b>
+        <button class="small" id="calNext">›</button>
+      </div>
+      <div class="cal" id="cal"></div>
+      <div class="legend" style="margin-top:10px">
+        <span><i style="background:rgba(124,156,255,.6);height:10px;width:10px"></i>Took meds</span>
+        <span>Focus: <i style="background:var(--ok);height:6px;width:6px;border-radius:50%"></i>good <i style="background:var(--mid);height:6px;width:6px;border-radius:50%;margin-left:6px"></i>ok <i style="background:var(--danger);height:6px;width:6px;border-radius:50%;margin-left:6px"></i>meh</span>
+      </div>
+    </div>
+    <div class="card" id="dayDetail"></div>
+    <div class="card">
+      <h2>Last 7 days</h2>
+      <div class="stats" id="stats"></div>
+      <div id="patterns" style="margin-top:12px"></div>
     </div>
     <div class="card">
-      <h2>Settings</h2>
+      <h2>What the app has learned</h2>
+      <div id="learned"></div>
+    </div>
+    <div class="card">
+      <h2>For your doctor</h2>
+      <div class="muted" style="font-size:14px;margin-bottom:10px">Every dose, how it felt, water and caffeine, as a spreadsheet file (CSV).</div>
+      <div class="row"><button id="exportBtn" class="primary">Export history (.csv)</button><button id="copyBtn">Copy as text</button></div>
+    </div>
+  </section>
+
+  <!-- ===================== SETTINGS ===================== -->
+  <section class="view" id="v-settings">
+    <div class="card">
+      <h2>Reminders</h2>
       <div class="setting"><span>Water reminder every</span>
         <select id="waterInt"><option value="45">45 min</option><option value="60">1 h</option><option value="90">1 h 30</option><option value="120">2 h</option></select></div>
-      <div class="setting"><span>Sound with reminders</span>
-        <select id="sound"><option value="1">On</option><option value="0">Off</option></select></div>
-      <div class="setting"><span>Already ate when taking it</span>
-        <select id="ateFirst"><option value="0">Remind me to eat</option><option value="1">Skip that reminder</option></select></div>
-      <div class="notice" id="webNotice">Reminders pop up while this page is open in a tab. Keep it pinned during the day.</div>
-      <div id="nativeBox" style="display:none">
-        <div class="notice">Reminders arrive as phone notifications, even with the app closed. Tap <b>Done</b> or <b>Snooze</b> right in the notification.</div>
-        <button class="small" id="testBtn" style="margin-top:10px">Send a test notification (5 s)</button>
+      <div class="setting"><span>Sound with reminders</span><select id="sound"><option value="1">On</option><option value="0">Off</option></select></div>
+      <div class="setting"><span>When I take my med</span><select id="ateFirst"><option value="0">Remind me to eat</option><option value="1">I've already eaten</option></select></div>
+      <div id="webNotif" class="setting"><span>Pop-up alerts in this tab</span><button class="small" id="notifBtn">🔔 Enable</button></div>
+      <div id="nativeNotif" style="display:none">
+        <div class="setting"><span>Phone notifications</span><button class="small" id="nNotifBtn">Check</button></div>
+        <div class="setting"><span>Test it</span><button class="small" id="testBtn">Send test (5 s)</button></div>
       </div>
+      <div class="hint" id="notifHint">Reminders pop up while this page is open in a tab.</div>
     </div>
-  </div>
 
-  <div class="card">
-    <div class="row" style="justify-content:space-between;margin-bottom:6px">
-      <h2 style="margin:0">Today's log</h2>
-      <button class="small ghost" id="clearBtn">Clear all</button>
+    <div class="card">
+      <h2>Sleep</h2>
+      <div class="setting"><span>Usual bedtime</span><input id="bedtime" type="time"></div>
+      <div class="hint">You'll get a warning when a dose would still be active at bedtime, or when caffeine is too close to it.</div>
     </div>
-    <div id="log"></div>
-  </div>
 
-  <div class="foot">Durations are typical ranges from the drug labels; your own body and dose shift them. Use the slider to match what you actually feel. This doesn't replace what your doctor told you.</div>
+    <div class="card">
+      <h2>Pill stock</h2>
+      <div id="stockList"></div>
+      <div class="setting" style="border-top:1px solid var(--line);margin-top:6px"><span>Warn me when I have less than</span>
+        <select id="refillDays"><option value="3">3 days left</option><option value="5">5 days left</option><option value="7">7 days left</option><option value="10">10 days left</option><option value="14">14 days left</option></select></div>
+    </div>
+
+    <div class="card">
+      <h2>Your data</h2>
+      <div class="muted" style="font-size:14px" id="syncInfo"></div>
+      <div class="row" style="margin-top:12px"><button class="small ghost" id="clearBtn">Delete all data</button></div>
+    </div>
+  </section>
+
+  <div class="foot">Durations are typical ranges from the drug labels; check-ins tune them to you.<br>This doesn't replace what your doctor told you.</div>
 </div>
 <div id="toasts"></div>
+<div id="dlg"><div class="box"><h3 id="dlgT"></h3><p id="dlgP"></p><div class="row" style="justify-content:flex-end"><button id="dlgNo">Cancel</button><button class="primary" id="dlgYes">OK</button></div></div></div>
 
 <script>
-/* ---------- medication data (hours) ---------- */
+/* ============================================================ data */
 const MEDS = {
-  // Methylphenidate
-  mph_ir:   {name:"Methylphenidate IR (Ritalin / Ritaline 10 mg)", g:"Methylphenidate", onset:.5, p1:1, p2:2.5, dur:4, range:"3–5 h"},
-  mph_la:   {name:"Ritalin LA / Ritaline LP", g:"Methylphenidate", onset:.5, p1:1.5, p2:6, dur:8, range:"6–8 h", note:"Two bumps: a morning one and a second around 4 h."},
-  medikinet:{name:"Medikinet (modified-release)", g:"Methylphenidate", onset:.5, p1:1.5, p2:5, dur:7.5, range:"6–8 h", note:"Works best taken with or after breakfast."},
-  quasym:   {name:"Quasym LP", g:"Methylphenidate", onset:.5, p1:1.5, p2:6, dur:8, range:"~8 h"},
-  concerta: {name:"Concerta / Concerta LP (OROS)", g:"Methylphenidate", onset:1, p1:2, p2:8, dur:11, range:"10–12 h", note:"Slow, smooth rise. Peak usually 6–8 h after."},
-  focalin_xr:{name:"Focalin XR (dexmethylphenidate)", g:"Methylphenidate", onset:.5, p1:1.5, p2:7, dur:11, range:"10–12 h"},
-  // Amphetamines
-  amph_ir:  {name:"Adderall IR", g:"Amphetamine", onset:.5, p1:1, p2:3, dur:5, range:"4–6 h"},
-  amph_xr:  {name:"Adderall XR", g:"Amphetamine", onset:.75, p1:2, p2:7, dur:11, range:"10–12 h"},
-  vyvanse:  {name:"Vyvanse / Elvanse (lisdexamfetamine)", g:"Amphetamine", onset:1.5, p1:3, p2:8, dur:12, range:"10–14 h", note:"Prodrug: kicks in slower, fades gently."},
-  dex_ir:   {name:"Dexamphetamine IR (Attentin, Dexedrine tabs)", g:"Amphetamine", onset:.5, p1:1, p2:3, dur:5, range:"4–6 h"},
-  mydayis:  {name:"Mydayis", g:"Amphetamine", onset:1, p1:3, p2:10, dur:15, range:"~14–16 h"},
-  // Non-stimulants
-  atx:      {name:"Atomoxetine (Strattera)", g:"Non-stimulant", nonstim:true, note:"Works all day, every day once built up (weeks). No wear-off timer, just the daily reminders."},
-  guan:     {name:"Guanfacine XR (Intuniv)", g:"Non-stimulant", nonstim:true, note:"Steady 24 h effect. Can make you sleepy or dizzy: stand up slowly and stay hydrated."},
-  custom:   {name:"Other / custom…", g:"Other"}
+  mph_ir:   {name:"Methylphenidate IR (Ritalin / Ritaline 10 mg)", short:"Methylphenidate IR", g:"Methylphenidate", onset:.5, p1:1, p2:2.5, dur:4, range:"3–5 h"},
+  mph_la:   {name:"Ritalin LA / Ritaline LP", short:"Ritaline LP", g:"Methylphenidate", onset:.5, p1:1.5, p2:6, dur:8, range:"6–8 h", note:"Two bumps: a morning one and a second around 4 h."},
+  medikinet:{name:"Medikinet (modified-release)", short:"Medikinet", g:"Methylphenidate", onset:.5, p1:1.5, p2:5, dur:7.5, range:"6–8 h", note:"Works best taken with or after breakfast."},
+  quasym:   {name:"Quasym LP", short:"Quasym LP", g:"Methylphenidate", onset:.5, p1:1.5, p2:6, dur:8, range:"~8 h"},
+  concerta: {name:"Concerta / Concerta LP (OROS)", short:"Concerta", g:"Methylphenidate", onset:1, p1:2, p2:8, dur:11, range:"10–12 h", note:"Slow, smooth rise. Peak usually 6–8 h after."},
+  focalin_xr:{name:"Focalin XR (dexmethylphenidate)", short:"Focalin XR", g:"Methylphenidate", onset:.5, p1:1.5, p2:7, dur:11, range:"10–12 h"},
+  amph_ir:  {name:"Adderall IR", short:"Adderall IR", g:"Amphetamine", onset:.5, p1:1, p2:3, dur:5, range:"4–6 h"},
+  amph_xr:  {name:"Adderall XR", short:"Adderall XR", g:"Amphetamine", onset:.75, p1:2, p2:7, dur:11, range:"10–12 h"},
+  vyvanse:  {name:"Vyvanse / Elvanse (lisdexamfetamine)", short:"Elvanse", g:"Amphetamine", onset:1.5, p1:3, p2:8, dur:12, range:"10–14 h", note:"Prodrug: kicks in slower, fades gently."},
+  dex_ir:   {name:"Dexamphetamine IR (Attentin, Dexedrine tabs)", short:"Dexamphetamine", g:"Amphetamine", onset:.5, p1:1, p2:3, dur:5, range:"4–6 h"},
+  mydayis:  {name:"Mydayis", short:"Mydayis", g:"Amphetamine", onset:1, p1:3, p2:10, dur:15, range:"~14–16 h"},
+  atx:      {name:"Atomoxetine (Strattera)", short:"Atomoxetine", g:"Non-stimulant", nonstim:true, note:"Works all day, every day once built up (weeks). No wear-off timer, just the daily reminders."},
+  guan:     {name:"Guanfacine XR (Intuniv)", short:"Guanfacine", g:"Non-stimulant", nonstim:true, note:"Steady 24 h effect. Can make you sleepy or dizzy: stand up slowly and stay hydrated."},
+  custom:   {name:"Other / custom…", short:"Custom", g:"Other"}
+};
+const CAF = [
+  {l:"Espresso", mg:65},{l:"Coffee", mg:95},{l:"Big coffee", mg:180},
+  {l:"Red Bull", mg:80},{l:"Monster", mg:160},{l:"Tea", mg:45}
+];
+const ICON={eat:["🍽️","var(--eat)"], snack:["🥜","var(--eat)"], water:["💧","var(--water)"], wear:["🌇","var(--wear)"], checkin:["📝","var(--accent)"]};
+const FEEL = {
+  focus:   {q:"Focus",            opts:[["good","Good"],["ok","OK"],["meh","Meh"]]},
+  appetite:{q:"Appetite",         opts:[["normal","Normal"],["low","Low"],["none","None"]]},
+  crash:   {q:"Comedown",         opts:[["none","None"],["mild","Mild"],["rough","Rough"]]},
+  jitter:  {q:"Jitters / anxiety",opts:[["none","None"],["some","Some"],["lot","A lot"]]}
 };
 
-/* ---------- state ---------- */
-const KEY="medtimer_v1";
-let S = {doses:[], done:{}, fired:{}, snooze:{}, water:{}, settings:{water:60, sound:1, ateFirst:0}, lastMed:"concerta", lastMg:{}};
+/* ============================================================ helpers */
+const H=3600e3, M=60e3, D=24*H;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=t=>new Date(t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+const pad=n=>String(n).padStart(2,"0");
+const dayKey=t=>{const d=new Date(t);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;};
+const today=()=>dayKey(Date.now());
+const ss=x=>x<=0?0:x>=1?1:x*x*(3-2*x);
+function dur(ms){ ms=Math.max(0,ms); let h=Math.floor(ms/H), m=Math.round((ms%H)/M); if(m===60){h++;m=0;} return h? `${h}h ${pad(m)}`:`${m} min`; }
+function adjLabel(v){ v=+v; return v===0?"typical":(v>0?`+${v} h`:`${v} h`); }
+const shortName=d=>d.prof.short||d.prof.name.split(" (")[0].split(" / ")[0];
+
+/* ============================================================ state */
+const KEY="medtimer_v1", FKEY="medtimer_fired";
 const NATIVE = !!(window.Android && window.Android.schedule);
-try{
-  const raw = (NATIVE && Android.loadState()) || localStorage.getItem(KEY);
-  if(raw){ const d=JSON.parse(raw); S=Object.assign(S, d); S.settings=Object.assign({water:60, sound:1, ateFirst:0}, d.settings||{}); }
-}catch(e){}
-function save(){
+function blank(){ return {v:2, doses:[], done:{}, snooze:{}, water:{}, caffeine:[], checkins:{}, skipped:{}, pills:{},
+  settings:{water:60, sound:1, ateFirst:0, bedtime:"23:00", refillDays:7}, lastMed:"", lastMg:{}, updatedAt:0}; }
+function normalize(d){
+  const S=Object.assign(blank(), d||{});
+  S.settings=Object.assign(blank().settings, (d&&d.settings)||{});
+  for(const k of ["done","snooze","water","checkins","skipped","pills","lastMg"]) if(!S[k]||typeof S[k]!=="object"||Array.isArray(S[k])) S[k]={};
+  if(!Array.isArray(S.doses)) S.doses=[]; if(!Array.isArray(S.caffeine)) S.caffeine=[];
+  // migrate old water keys ("Sun Nov 15 2026")
+  for(const k of Object.keys(S.water)) if(!/^\d{4}-/.test(k)){ const t=Date.parse(k); if(!isNaN(t)) S.water[dayKey(t)]=(S.water[dayKey(t)]||0)+S.water[k]; delete S.water[k]; }
+  for(const d of S.doses){ if(!d.prof.short && MEDS[d.key]) d.prof.short=MEDS[d.key].short; }
+  delete S.fired;
+  return S;
+}
+let S=blank();
+try{ const raw=(NATIVE && Android.loadState()) || localStorage.getItem(KEY); if(raw) S=normalize(JSON.parse(raw)); }catch(e){}
+let FIRED={}; try{ FIRED=JSON.parse(localStorage.getItem(FKEY)||"{}")||{}; }catch(e){}
+function saveFired(){ try{ localStorage.setItem(FKEY, JSON.stringify(FIRED)); }catch(e){} }
+
+function persistLocal(){
   const j=JSON.stringify(S);
   try{ localStorage.setItem(KEY, j); }catch(e){}
   if(NATIVE){ try{ Android.saveState(j); }catch(e){} }
 }
+function save(){ S.updatedAt=Date.now(); prune(); persistLocal(); queueWrite(); }
 
-const H=3600e3, M=60e3;
-const $=id=>document.getElementById(id);
-const fmt=t=>new Date(t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
-const today=()=>new Date().toDateString();
-function dur(ms){ ms=Math.max(0,ms); const h=Math.floor(ms/H), m=Math.round((ms%H)/M); return h? `${h}h ${String(m).padStart(2,"0")}`:`${m} min`; }
-
-/* ---------- form ---------- */
-const sel=$("med"); const groups={};
-for(const [k,m] of Object.entries(MEDS)){
-  if(!groups[m.g]){ groups[m.g]=document.createElement("optgroup"); groups[m.g].label=m.g; sel.appendChild(groups[m.g]); }
-  const o=document.createElement("option"); o.value=k; o.textContent=m.name; groups[m.g].appendChild(o);
+function prune(){
+  const now=Date.now();
+  S.doses=S.doses.filter(d=>now-d.t < 120*D);
+  S.caffeine=S.caffeine.filter(c=>now-c.t < 120*D);
+  const ids=new Set(S.doses.map(d=>d.id)), recent=new Set(S.doses.filter(d=>now-d.t<3*D).map(d=>d.id));
+  for(const k of ["done","snooze"]) for(const i of Object.keys(S[k])) if(!recent.has(i.split("-")[0])) delete S[k][i];
+  for(const k of ["checkins","skipped"]) for(const i of Object.keys(S[k])) if(!ids.has(i)) delete S[k][i];
+  const cut=dayKey(now-120*D); for(const k of Object.keys(S.water)) if(k<cut) delete S.water[k];
+  for(const k of Object.keys(FIRED)) if(!recent.has(k.split("-")[0])) delete FIRED[k];
 }
-sel.value=S.lastMed in MEDS ? S.lastMed : "concerta";
-function setNow(){ const d=new Date(); $("time").value=`${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; }
-setNow();
-function adjLabel(v){ v=+v; return v===0?"typical":(v>0?`+${v} h`:`${v} h`); }
-function medInfo(){
-  const m=MEDS[sel.value];
-  $("customBox").style.display = sel.value==="custom" ? "grid":"none";
-  $("adj").parentElement.style.display = m.nonstim ? "none":"flex";
-  if(S.lastMg[sel.value] && !$("mg").value) $("mg").value=S.lastMg[sel.value];
-  let t="";
-  if(m.nonstim) t=m.note;
-  else if(sel.value!=="custom") t=`Typically lasts <b>${m.range}</b>, kicks in after ~${Math.round(m.onset*60)} min.` + (m.note?` ${m.note}`:"");
-  else t="Enter how long it usually lasts for you.";
-  $("medInfo").innerHTML=t;
+
+/* ============================================================ sync (claude.ai storage) */
+let docRef=null, writeTimer=null, writing=Promise.resolve(), lastWritten="", syncState="local";
+function setSync(s){
+  syncState=s;
+  const map={local:["💾 This device","Saved on this device only. Open MedTimer from claude.ai while signed in to sync it between your laptop and phone browser."],
+    connecting:["☁ Connecting…","Connecting to your claude.ai storage…"],
+    synced:["☁ Synced","Synced to your claude.ai account: open this page on your laptop or phone browser and you'll see the same data. Only you can see it."],
+    offline:["☁ Offline","Can't reach your claude.ai storage right now. Changes are saved here and will sync when it's back."],
+    error:["⚠ Sync error","Sync stopped working on this visit. Your data is still saved on this device."],
+    full:["⚠ Storage full","Your synced storage is full. Data is still saved on this device."]};
+  const [tag,info]=map[s]||map.local;
+  if(NATIVE){ $("syncTag").textContent="📱 This phone"; $("syncInfo").textContent="Saved on this phone. (Syncing works in the web version on claude.ai.)"; return; }
+  $("syncTag").textContent=tag; $("syncInfo").textContent=info;
 }
-sel.onchange=()=>{ $("mg").value=""; medInfo(); };
-$("adj").oninput=e=>$("adjOut").textContent=adjLabel(e.target.value);
-$("nowBtn").onclick=setNow;
-medInfo();
+async function initSync(){
+  if(NATIVE || !window.claude || typeof window.claude.use!=="function"){ setSync("local"); return; }
+  try{
+    const [db,user]=await Promise.all([claude.use("db"), claude.use("user")]);
+    if(!db||!user){ setSync("local"); return; }
+    const id=await user.id(); if(!id){ setSync("local"); return; }
+    docRef=db.doc("data/users/"+id+"/medtimer");
+    setSync("connecting");
+    let timer=setTimeout(()=>setSync("offline"),10000);
+    docRef.onSnapshot(snap=>{
+      if(!snap.metadata.fromCache){ clearTimeout(timer); }
+      if(snap.exists){
+        const r=snap.data()||{};
+        if((r.updatedAt||0) > (S.updatedAt||0) && typeof r.json==="string"){
+          try{ S=normalize(JSON.parse(r.json)); lastWritten=r.json; persistLocal(); render(); }catch(e){}
+        } else if((r.updatedAt||0) < (S.updatedAt||0)) queueWrite(true);
+      } else if(!snap.metadata.fromCache && (S.doses.length||S.updatedAt)) queueWrite(true);
+      if(!snap.metadata.fromCache && syncState!=="error" && syncState!=="full") setSync("synced");
+    }, err=>{ clearTimeout(timer); setSync(err && err.code==="revoked" ? "local" : "error"); });
+  }catch(e){ setSync("local"); }
+}
+function queueWrite(now){
+  if(!docRef) return;
+  clearTimeout(writeTimer);
+  writeTimer=setTimeout(()=>{
+    const json=JSON.stringify(S); if(json===lastWritten) return;
+    lastWritten=json; const body={json, updatedAt:S.updatedAt||Date.now()};
+    writing=writing.then(()=>docRef.set(body)).then(()=>{ if(syncState!=="error") setSync("synced"); })
+      .catch(e=>{ const c=e&&e.code; if(c==="quota_exceeded") setSync("full"); else if(c==="unavailable"){ lastWritten=""; setTimeout(()=>queueWrite(true), 4000+Math.random()*3000);} else { setSync("error"); docRef=null; } });
+  }, now?200:1200);
+}
 
-$("doseForm").onsubmit=e=>{
-  e.preventDefault(); unlockAudio();
-  const key=sel.value, base=MEDS[key];
-  const [hh,mm]=$("time").value.split(":").map(Number);
-  const d=new Date(); d.setHours(hh,mm,0,0);
-  if(d.getTime()-Date.now()>3*H) d.setDate(d.getDate()-1); // e.g. 23:50 logged after midnight
-  let prof;
-  if(key==="custom"){
-    const D=Math.max(1,+$("customDur").value||8), on=Math.max(0,(+$("customOnset").value||45)/60);
-    prof={name:$("customName").value.trim()||"Custom med", onset:on, p1:on+ (D*.12), p2:D*.65, dur:D};
-  } else prof={...base};
-  const adj=+$("adj").value;
-  if(!prof.nonstim && adj){ const f=(prof.dur+adj)/prof.dur; prof.p1*=f; prof.p2*=f; prof.dur+=adj; }
-  const dose={id:Date.now().toString(36), key, mg:+$("mg").value, t:d.getTime(), prof, adj};
-  S.doses.push(dose); S.lastMed=key; S.lastMg[key]=dose.mg;
-  save(); render();
-  toast("✅", `Timer started: ${prof.name.split(" (")[0]} ${dose.mg} mg`, prof.nonstim? "Daily reminders added." : `Should last until about ${fmt(dose.t+prof.dur*H)}.`);
-};
-
-/* ---------- phases & reminders ---------- */
+/* ============================================================ model */
 function phases(p){
   const wear=Math.max(p.p2, p.dur-1);
   return [
@@ -315,211 +467,605 @@ function phases(p){
     {k:"Wearing off", c:"var(--wear)", a:wear, b:p.dur}
   ].filter(x=>x.b>x.a);
 }
-function currentPhase(dose, now){
-  const h=(now-dose.t)/H;
+function phaseAt(d, now){
+  const h=(now-d.t)/H;
   if(h<0) return {k:"Not taken yet", c:"var(--off)"};
-  if(h>=dose.prof.dur) return {k:"Worn off", c:"var(--off)"};
-  return phases(dose.prof).find(x=>h>=x.a && h<x.b) || {k:"Active", c:"var(--steady)"};
+  if(h>=d.prof.dur) return {k:"Worn off", c:"var(--off)"};
+  return phases(d.prof).find(x=>h>=x.a && h<x.b) || {k:"Active", c:"var(--steady)"};
 }
-function remindersFor(dose){
-  const p=dose.prof, t0=dose.t, out=[], short=p.nonstim?false:p.dur<6.5;
-  const add=(i,kind,offH,title,sub)=>out.push({id:`${dose.id}-${kind}-${i}`, t:t0+offH*H, kind, title, sub, dose:dose.id});
-  const nm=p.name.split(" (")[0].split(" / ")[0];
-  if(!S.settings.ateFirst) add(0,"eat",0,"Eat breakfast now","Protein + something real before your appetite drops.");
-  if(p.nonstim){
-    for(let i=1;i<=3;i++) add(i,"water",i*3,"Drink a glass of water","Stay hydrated through the day.");
-    add(1,"eat",4.5,"Lunch time","Regular meals help with side effects.");
-    return out;
-  }
-  // water during active window
-  const iv=S.settings.water/60; let i=1;
-  for(let h=iv; h<p.dur-0.25; h+=iv, i++) add(i,"water",h,"Drink a glass of water",`${nm} hides thirst. Small sips count.`);
-  // meals
-  if(short){
-    add(1,"eat",Math.max(p.dur-0.75, p.onset+1),"Eat while it's fading","Appetite is coming back. Good window for a meal.");
-  } else {
-    const lunch=Math.min(4.5, p.dur*0.42);
-    add(1,"eat",lunch,"Eat lunch, even if you're not hungry","Appetite is lowest now. Go small: yogurt, a sandwich, a smoothie.");
-    if(p.dur>=9) add(2,"snack",lunch+3.25,"Snack break","Nuts, fruit, cheese… keeps you from crashing later.");
-  }
-  add(9,"wear",Math.max(p.dur-0.75, p.p2),"Wearing off soon","Have a real meal and some water to soften the rebound / comedown.");
-  add(10,"off",p.dur,`${nm} has worn off`,"Eat properly if you haven't. Wind down for sleep later.");
-  return out;
+function intensity(p, h){
+  if(h<0 || h>p.dur+1.5) return 0;
+  const wear=Math.max(p.p2, p.dur-1);
+  if(h<p.onset) return .25*ss(h/(p.onset||.01));
+  if(h<p.p1) return .25+.75*ss((h-p.onset)/((p.p1-p.onset)||.01));
+  if(h<p.p2) return 1;
+  if(h<wear) return 1-.35*ss((h-p.p2)/((wear-p.p2)||.01));
+  if(h<p.dur) return .65-.5*ss((h-wear)/((p.dur-wear)||.01));
+  return .15*(1-ss((h-p.dur)/1.5));
 }
-function allReminders(){ return S.doses.flatMap(remindersFor).map(r=>({...r, t:S.snooze[r.id]||r.t})).sort((a,b)=>a.t-b.t); }
-const ICON={eat:["🍽️","var(--eat)"], snack:["🥜","var(--eat)"], water:["💧","var(--water)"], wear:["🌇","var(--wear)"], off:["🌙","var(--kick)"]};
+const stim=()=>S.doses.filter(d=>!d.prof.nonstim);
+const endOf=d=>d.t+d.prof.dur*H;
+function effectAt(t){ let s=0; for(const d of stim()) s+=intensity(d.prof,(t-d.t)/H); return s; }
+function cafAt(t){ let s=0; for(const c of S.caffeine){ const h=(t-c.t)/H; if(h<0||h>30) continue; s+=c.mg*(h<.75? ss(h/.75): Math.pow(.5,(h-.75)/5)); } return s; }
+function bedAfter(t){
+  const [bh,bm]=(S.settings.bedtime||"23:00").split(":").map(Number);
+  const d=new Date(t); d.setHours(bh,bm,0,0);
+  if(d.getTime() < t-6*H) d.setDate(d.getDate()+1);
+  if(d.getTime()-t > 18*H) d.setDate(d.getDate()-1); // after midnight: the bedtime you just passed
+  return d.getTime();
+}
+// personal learned adjustment per med (hours vs label duration)
+function learned(key){
+  const xs=S.doses.filter(d=>d.key===key && S.checkins[d.id] && typeof S.checkins[d.id].offset==="number")
+    .sort((a,b)=>b.t-a.t).slice(0,6).map(d=>(d.adj||0)+S.checkins[d.id].offset);
+  if(!xs.length) return null;
+  const avg=xs.reduce((a,b)=>a+b,0)/xs.length;
+  return {adj:Math.max(-3,Math.min(3,Math.round(avg*2)/2)), n:xs.length};
+}
+function buildProf(key, adj, custom){
+  let prof;
+  if(key==="custom"){
+    const Dh=Math.max(1,+custom.dur||8), on=Math.max(0,(+custom.onset||45)/60);
+    prof={name:custom.name||"Custom med", short:custom.name||"Custom med", onset:on, p1:on+Dh*.12, p2:Dh*.65, dur:Dh};
+  } else { const m=MEDS[key]; prof={name:m.name, short:m.short, onset:m.onset, p1:m.p1, p2:m.p2, dur:m.dur, nonstim:!!m.nonstim}; }
+  if(!prof.nonstim && adj){ const f=Math.max(.3,(prof.dur+adj)/prof.dur); prof.p1*=f; prof.p2*=f; prof.onset=Math.min(prof.onset,prof.p1); prof.dur=Math.max(1,prof.dur+adj); }
+  return prof;
+}
 
-/* ---------- render ---------- */
-let showDone=false;
+/* reminders, de-duplicated across stacked doses */
+function remindersAll(){
+  const out=[]; const st=stim().slice().sort((a,b)=>a.t-b.t);
+  const iv=S.settings.water*M;
+  const wins=[];
+  for(const d of st){ const a=d.t, b=endOf(d), w=wins[wins.length-1]; if(w && a<=w.b){ w.b=Math.max(w.b,b); w.ds.push(d);} else wins.push({a,b,ds:[d]}); }
+  for(const w of wins){ let i=1; for(let t=w.a+iv; t<w.b-15*M; t+=iv, i++) out.push({id:`${w.ds[0].id}-water-${i}`, t, kind:"water", title:"Drink a glass of water", sub:"Stimulants hide thirst. Small sips count."}); }
+  for(const d of S.doses){
+    const p=d.prof, t0=d.t, nm=shortName(d);
+    const add=(i,kind,offH,title,sub)=>out.push({id:`${d.id}-${kind}-${i}`, t:t0+offH*H, kind, title, sub, dose:d.id});
+    const firstOfDay=!S.doses.some(o=>o!==d && o.t<d.t && d.t-o.t<6*H);
+    if(!+S.settings.ateFirst && firstOfDay) add(0,"eat",0,"Eat breakfast now","Protein + something real before your appetite drops.");
+    if(p.nonstim){
+      for(let i=1;i<=3;i++) add(i,"water",i*3,"Drink a glass of water","Stay hydrated through the day.");
+      add(1,"eat",4.5,"Lunch time","Regular meals help with side effects.");
+      continue;
+    }
+    if(p.dur<6.5) add(1,"eat",Math.max(p.dur-.75, p.onset+1),"Eat while it's fading","Appetite is coming back. Good window for a meal.");
+    else {
+      const lunch=Math.min(4.5, p.dur*.42);
+      add(1,"eat",lunch,"Eat lunch, even if you're not hungry","Appetite is lowest now. Go small: yogurt, a sandwich, a smoothie.");
+      if(p.dur>=9) add(2,"snack",lunch+3.25,"Snack break","Nuts, fruit, cheese… keeps you from crashing later.");
+    }
+    const extended=st.some(o=>o!==d && o.t>d.t && o.t<endOf(d) && endOf(o)>endOf(d)+H);
+    if(!extended) add(9,"wear",Math.max(p.dur-.75, p.p2),"Wearing off soon","Have a real meal and some water to soften the comedown.");
+    add(10,"checkin",p.dur,`How did ${nm} go?`,"Tap to log how it felt. It makes the timer fit you.");
+  }
+  out.sort((a,b)=>a.t-b.t);
+  const res=[]; let lastMeal=-Infinity;
+  for(const r of out){ if(r.kind==="eat"||r.kind==="snack"){ if(r.t-lastMeal<75*M) continue; lastMeal=r.t; } res.push(r); }
+  return res.map(r=>({...r, t:S.snooze[r.id]||r.t})).sort((a,b)=>a.t-b.t);
+}
+
+/* pills */
+function dosesPerDay(key){
+  const now=Date.now(), xs=S.doses.filter(d=>d.key===key && now-d.t<14*D);
+  if(!xs.length) return 1;
+  const first=Math.min(...xs.map(d=>d.t)), days=Math.max(1, Math.ceil((now-first)/D));
+  return Math.max(.5, xs.length/Math.min(14,days));
+}
+function stockInfo(key){
+  const p=S.pills[key]; if(!p || p.count==null || p.count==="") return null;
+  const per=+p.perDose||1, perDay=dosesPerDay(key)*per;
+  return {count:+p.count, days:Math.floor(+p.count/perDay)};
+}
+
+/* ============================================================ actions */
+function logDose({key, mg, t, adj, custom}, confirmed){
+  const prof=buildProf(key, adj, custom);
+  if(!prof.nonstim && !confirmed){
+    const end=t+prof.dur*H, bed=bedAfter(t);
+    if(end>bed){
+      return ask("Still active at bedtime", `${prof.short} ${mg} mg taken at ${fmt(t)} should last until about ${fmt(end)}, after your ${S.settings.bedtime} bedtime. That can make it hard to fall asleep.`, "Log anyway", ()=>logDose({key,mg,t,adj,custom}, true));
+    }
+  }
+  const dose={id:Date.now().toString(36), key, mg, t, prof, adj};
+  S.doses.push(dose); S.lastMed=key; S.lastMg[key]=mg;
+  if(S.pills[key] && S.pills[key].count!=null && S.pills[key].count!==""){ S.pills[key].count=Math.max(0,(+S.pills[key].count)-(+S.pills[key].perDose||1)); }
+  save(); render();
+  toast("✅", `Timer started: ${prof.short} ${mg} mg`, prof.nonstim? "Daily reminders added." : `Should last until about ${fmt(t+prof.dur*H)}.`);
+}
+function removeDose(id){
+  const d=S.doses.find(x=>x.id===id); if(!d) return;
+  S.doses=S.doses.filter(x=>x.id!==id);
+  if(S.pills[d.key] && S.pills[d.key].count!=null && S.pills[d.key].count!=="" && Date.now()-d.t<D) S.pills[d.key].count=(+S.pills[d.key].count)+(+S.pills[d.key].perDose||1);
+  save(); render();
+}
+function addWater(n, silent){
+  const k=today(); S.water[k]=Math.max(0,(S.water[k]||0)+n);
+  if(n>0 && !silent){ const r=remindersAll().find(r=>r.kind==="water" && !S.done[r.id] && Math.abs(r.t-Date.now())<30*M); if(r) S.done[r.id]=1; }
+  save(); render();
+}
+function addCaffeine(mg, label){
+  mg=Math.round(+mg); if(!(mg>0)) return;
+  const now=Date.now();
+  S.caffeine.push({id:now.toString(36), t:now, mg, l:label||"Caffeine"});
+  save(); render();
+  const total=S.caffeine.filter(c=>dayKey(c.t)===today()).reduce((a,c)=>a+c.mg,0);
+  const bed=bedAfter(now);
+  if(total>400) toast("⚠️","Over 400 mg today",`You're at ${total} mg. On top of a stimulant that often means jitters, a racing heart and a harder crash.`);
+  else if(bed-now<6*H) toast("☕",`${label||"Caffeine"} logged`,`Only ${dur(bed-now)} before bed. Caffeine takes ~5 h to drop by half, so this may still be in your system when you try to sleep.`);
+  else if(stim().some(d=>Date.now()<endOf(d))) toast("☕",`${label||"Caffeine"} logged`,"It's stacking with your med. Watch for jitters, and drink a glass of water with it.");
+}
+function markDone(r){ S.done[r.id]=1; if(r.kind==="water") addWater(1,true); else { save(); render(); } }
+
+/* ============================================================ form */
+const sel=$("med"); const groups={};
+for(const [k,m] of Object.entries(MEDS)){
+  if(!groups[m.g]){ groups[m.g]=document.createElement("optgroup"); groups[m.g].label=m.g; sel.appendChild(groups[m.g]); }
+  const o=document.createElement("option"); o.value=k; o.textContent=m.name; groups[m.g].appendChild(o);
+}
+sel.value=S.lastMed in MEDS ? S.lastMed : "concerta";
+function setNow(){ const d=new Date(); $("time").value=`${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function medInfo(){
+  const k=sel.value, m=MEDS[k];
+  $("customBox").style.display = k==="custom" ? "grid":"none";
+  $("adjRow").style.display = m.nonstim ? "none":"flex";
+  if(S.lastMg[k] && !$("mg").value) $("mg").value=S.lastMg[k];
+  let t="";
+  if(m.nonstim) t=esc(m.note);
+  else if(k!=="custom") t=`Typically lasts <b>${m.range}</b>, kicks in after ~${Math.round(m.onset*60)} min.` + (m.note?` ${esc(m.note)}`:"");
+  else t="Enter how long it usually lasts for you.";
+  $("medInfo").innerHTML=t;
+  const L=m.nonstim?null:learned(k);
+  $("adj").value = L? L.adj : 0; $("adjOut").textContent=adjLabel($("adj").value);
+  $("learnInfo").textContent = L ? `✓ Set from your ${L.n} check-in${L.n>1?"s":""}: it lasts ${adjLabel(L.adj)==="typical"?"about the typical time":adjLabel(L.adj).replace("h"," h vs typical")} for you.` : "";
+}
+sel.onchange=()=>{ $("mg").value=""; medInfo(); };
+$("adj").oninput=e=>$("adjOut").textContent=adjLabel(e.target.value);
+$("nowBtn").onclick=setNow;
+$("toggleForm").onclick=()=>{ const on=$("formCard").style.display==="none"; $("formCard").style.display=on?"block":"none"; $("toggleForm").textContent=on?"− Hide":"+ Log a different dose"; if(on){ setNow(); medInfo(); } };
+$("doseForm").onsubmit=e=>{
+  e.preventDefault(); unlockAudio();
+  const key=sel.value, mg=+String($("mg").value).replace(",", ".");
+  if(!(mg>0)) return;
+  const [hh,mm]=$("time").value.split(":").map(Number);
+  const d=new Date(); d.setHours(hh,mm,0,0);
+  if(d.getTime()-Date.now()>3*H) d.setDate(d.getDate()-1);
+  logDose({key, mg, t:d.getTime(), adj:+$("adj").value, custom:{name:$("customName").value.trim(), dur:$("customDur").value, onset:$("customOnset").value}});
+  $("formCard").style.display="none"; $("toggleForm").textContent="+ Log a different dose";
+};
+$("usualBtn").onclick=()=>{
+  unlockAudio();
+  const key=S.lastMed, mg=S.lastMg[key]; if(!key||!mg) return;
+  const L=MEDS[key] && !MEDS[key].nonstim ? learned(key) : null;
+  const last=S.doses.filter(d=>d.key===key).sort((a,b)=>b.t-a.t)[0];
+  const custom = key==="custom" && last ? {name:last.prof.short, dur:last.prof.dur-(last.adj||0), onset:last.prof.onset*60} : {};
+  logDose({key, mg, t:Date.now(), adj: L? L.adj : (last? last.adj||0 : 0), custom});
+};
+
+/* ============================================================ render */
+let showDone=false, showMore=false, calMonth=null, selDay=null;
 function render(){
   const now=Date.now();
-  // prune old doses (>30h)
-  S.doses=S.doses.filter(d=>now-d.t < 30*H);
   $("clock").textContent=fmt(now);
+  renderToday(now);
+  if(curView==="history") renderHistory();
+  if(curView==="settings") renderSettings();
+  syncNative();
+}
 
-  // active
-  const act=$("active"); act.innerHTML="";
-  const live=S.doses.filter(d=>d.prof.nonstim ? now-d.t<24*H : now-d.t < d.prof.dur*H+2*H);
-  if(!live.length) act.innerHTML=`<div class="empty">No active dose. Log one above to start the timer.</div>`;
-  for(const d of live){
-    const p=d.prof, ph=currentPhase(d,now), el=document.createElement("div"); el.className="dose";
-    if(p.nonstim){
-      el.innerHTML=`<div class="dose-top"><div><div class="dose-name">${p.name}</div><div class="dose-meta">${d.mg} mg · taken ${fmt(d.t)}</div>
-        <span class="phase" style="background:rgba(79,182,160,.15);color:var(--steady)">All-day effect</span></div></div><div class="nonstim">${MEDS[d.key]?.note||""}</div>`;
-    } else {
-      const total=p.dur, h=(now-d.t)/H, left=d.t+total*H-now;
-      const segs=phases(p).map(x=>`<div style="width:${(x.b-x.a)/total*100}%;background:${x.c}"></div>`).join("");
-      const pos=Math.min(100,Math.max(0,h/total*100));
-      const big = h<0 ? `${dur(d.t-now)}<small>until taken</small>` : left>0 ? `${dur(left)}<small>left</small>` : `Done<small>ended ${fmt(d.t+total*H)}</small>`;
-      const nextPh = phases(p).find(x=>x.a>h);
-      el.innerHTML=`<div class="dose-top"><div><div class="dose-name">${p.name.split(" (")[0]}</div>
-        <div class="dose-meta">${d.mg} mg · taken ${fmt(d.t)}${d.adj?` · ${adjLabel(d.adj)}`:""}</div>
-        <span class="phase" style="background:color-mix(in srgb, ${ph.c} 22%, transparent);color:${ph.c==="var(--off)"?"var(--muted)":ph.c}">${ph.k}</span>
-        ${nextPh&&h>=0?`<span class="dose-meta" style="margin-left:6px">→ ${nextPh.k.toLowerCase()} at ${fmt(d.t+nextPh.a*H)}</span>`:""}</div>
-        <div class="big">${big}</div></div>
-        <div class="bar">${segs}${h>=0&&h<=total?`<span class="now" style="left:calc(${pos}% - 1.5px)"></span>`:""}</div>
-        <div class="ticks"><span>${fmt(d.t)}</span><span>peak ${fmt(d.t+p.p1*H)}–${fmt(d.t+p.p2*H)}</span><span>${fmt(d.t+total*H)}</span></div>`;
-    }
-    act.appendChild(el);
+function renderToday(now){
+  // usual button
+  const uk=S.lastMed, umg=uk && S.lastMg[uk];
+  if(uk && umg && (MEDS[uk]||uk==="custom")){
+    $("usualBtn").style.display="flex";
+    const last=S.doses.filter(d=>d.key===uk).sort((a,b)=>b.t-a.t)[0];
+    const nm= last? shortName(last) : MEDS[uk].short;
+    $("usualTitle").textContent=`Took my usual: ${nm} ${umg} mg`;
+    $("usualSub").textContent=`Tap when you take it · logs it at ${fmt(now)}`;
+  } else {
+    $("usualBtn").style.display="none";
+    if(!S.doses.length && $("formCard").style.display==="none"){ $("formCard").style.display="block"; $("toggleForm").textContent="− Hide"; setNow(); medInfo(); }
   }
 
-  // reminders
-  const box=$("reminders"); box.innerHTML="";
-  let rs=allReminders().filter(r=> r.t > now-6*H);
-  if(!showDone) rs=rs.filter(r=>!S.done[r.id]);
-  if(!rs.length) box.innerHTML=`<div class="empty">${S.doses.length?"All caught up 🎉":"Reminders appear here once you log a dose."}</div>`;
-  for(const r of rs.slice(0,14)){
-    const [ic,col]=ICON[r.kind]; const done=S.done[r.id];
-    const state = done?"done": r.t<=now ? (now-r.t>45*M?"missed":"due") : "";
-    const row=document.createElement("div"); row.className="rem "+state;
-    row.innerHTML=`<div class="ico" style="background:color-mix(in srgb, ${col} 18%, transparent)">${ic}</div>
-      <div class="t">${fmt(r.t)}</div>
-      <div class="txt"><b>${r.title}</b><span>${state==="due"?"Now · ":state==="missed"?"Missed · ":r.t>now?`in ${dur(r.t-now)} · `:""}${r.sub}</span></div>`;
-    const b=document.createElement("button"); b.className="small"+(done?" ghost":"");
-    b.textContent=done?"Undo":"Done";
-    b.onclick=()=>{ if(done) delete S.done[r.id]; else { S.done[r.id]=1; if(r.kind==="water") addWater(1,true); } save(); render(); };
-    row.appendChild(b); box.appendChild(row);
+  // banners
+  let b="";
+  for(const k of Object.keys(S.pills)){
+    const si=stockInfo(k); if(!si) continue;
+    const nm=MEDS[k]? MEDS[k].short : k;
+    if(si.count<=0) b+=banner("bad","💊",`Out of ${esc(nm)}`,"Your pill count is at 0. Update it in Settings after your refill.");
+    else if(si.days<= +S.settings.refillDays) b+=banner("warn","💊",`Refill soon: ${si.count} ${esc(nm)} left (~${si.days} day${si.days===1?"":"s"})`,"ADHD prescriptions are short: book your doctor / pharmacy now so you don't run out.", `<button class="small" onclick="location.hash='#settings'">Update</button>`);
   }
+  if(NATIVE){ try{ const st=JSON.parse(Android.status()); if(!st.notif) b+=banner("bad","🔕","Notifications are off","You won't get reminders until you turn them on.",`<button class="small primary" onclick="Android.requestNotif()">Turn on</button>`);
+    if(!st.exact) b+=banner("warn","⏰","Allow exact alarms","Without it, Android may deliver reminders late.",`<button class="small" onclick="Android.openExactSettings()">Open</button>`);}catch(e){} }
+  $("banners").innerHTML=b;
+
+  renderEffect(now);
+  renderCheckin(now);
+  renderReminders(now);
 
   // water
   const w=S.water[today()]||0; $("waterN").textContent=w;
   $("glasses").innerHTML=Array.from({length:Math.max(8,w)},(_,i)=>`<span class="${i<w?"f":""}"></span>`).join("");
-
-  // log
-  const lg=$("log"); const todays=S.doses.filter(d=>new Date(d.t).toDateString()===today() || now-d.t<16*H).sort((a,b)=>a.t-b.t);
-  lg.innerHTML = todays.length? "" : `<div class="empty">Nothing logged today.</div>`;
-  for(const d of todays){
-    const it=document.createElement("div"); it.className="log-item";
-    it.innerHTML=`<span><b>${fmt(d.t)}</b> &nbsp;${d.prof.name.split(" (")[0]} · ${d.mg} mg</span>`;
-    const b=document.createElement("button"); b.className="small ghost"; b.textContent="Remove";
-    b.onclick=()=>{ S.doses=S.doses.filter(x=>x.id!==d.id); save(); render(); };
-    it.appendChild(b); lg.appendChild(it);
-  }
-  syncNative();
+  // caffeine
+  const cafs=S.caffeine.filter(c=>dayKey(c.t)===today()).sort((a,b)=>a.t-b.t);
+  const tot=cafs.reduce((a,c)=>a+c.mg,0);
+  $("cafN").textContent=tot; $("cafN").style.color = tot>400? "var(--danger)":"var(--caf)";
+  $("cafList").innerHTML = cafs.map(c=>`<div class="mini"><span>${fmt(c.t)} · ${esc(c.l)} · ${c.mg} mg</span><button class="link" data-rmcaf="${c.id}">remove</button></div>`).join("") +
+    (tot? `<div class="mini"><span>In your system now: ~${Math.round(cafAt(now))} mg</span></div>`:"");
 }
-$("showAllBtn").onclick=e=>{ showDone=!showDone; e.target.textContent=showDone?"Hide done":"Show done"; render(); };
-$("clearBtn").onclick=e=>{
-  if(e.target.dataset.armed){ S.doses=[]; S.done={}; S.fired={}; S.snooze={}; save(); render(); e.target.textContent="Clear all"; delete e.target.dataset.armed; }
-  else { e.target.dataset.armed=1; e.target.textContent="Tap again to confirm"; setTimeout(()=>{ e.target.textContent="Clear all"; delete e.target.dataset.armed; },3000); }
+function banner(kind, ico, title, sub, btn){ return `<div class="banner ${kind}"><span class="ico">${ico}</span><div class="txt"><b>${esc(title)}</b>${esc(sub)}</div>${btn||""}</div>`; }
+
+function renderEffect(now){
+  const st=stim();
+  const relevant=st.filter(d=>endOf(d)+1.5*H > now-1*H && d.t < now+14*H);
+  const nonstim=S.doses.filter(d=>d.prof.nonstim && now-d.t<D);
+  const cafs=S.caffeine.filter(c=>now-c.t<12*H);
+  const active=relevant.filter(d=>d.t<=now && endOf(d)>now);
+  const endAll=relevant.length? Math.max(...relevant.map(endOf)) : 0;
+
+  // big number + phase
+  if(active.length){
+    $("effBig").innerHTML=`${dur(endAll-now)}<small>left · ends ~${fmt(endAll)}</small>`;
+    const top=active.map(d=>({d, v:intensity(d.prof,(now-d.t)/H)})).sort((a,b)=>b.v-a.v)[0].d;
+    const ph=phaseAt(top, now);
+    const nxt=phases(top.prof).find(x=>x.a>(now-top.t)/H);
+    $("effPhase").innerHTML=`<span class="phase" style="background:color-mix(in srgb, ${ph.c} 22%, transparent);color:${ph.c}">${ph.k}</span>`+
+      (nxt?`<span class="muted" style="font-size:13px;margin-left:8px">→ ${nxt.k.toLowerCase()} at ${fmt(top.t+nxt.a*H)}</span>`:"")+
+      (active.length>1?`<span class="muted" style="font-size:13px;margin-left:8px">· ${active.length} doses stacking</span>`:"");
+  } else if(relevant.some(d=>d.t>now)){
+    const nx=relevant.filter(d=>d.t>now).sort((a,b)=>a.t-b.t)[0];
+    $("effBig").innerHTML=`${dur(nx.t-now)}<small>until ${esc(shortName(nx))}</small>`; $("effPhase").innerHTML="";
+  } else if(relevant.length){
+    $("effBig").innerHTML=`Worn off<small>since ${fmt(endAll)}</small>`; $("effPhase").innerHTML="";
+  } else {
+    $("effBig").innerHTML=nonstim.length? `All-day<small>${esc(shortName(nonstim[0]))}</small>` : `No active dose`;
+    $("effPhase").innerHTML= nonstim.length? `<span class="muted" style="font-size:13px">${esc(MEDS[nonstim[0].key]?.note||"")}</span>` : `<span class="muted" style="font-size:13px">Tap “Took my usual” when you take it.</span>`;
+  }
+  const v=effectAt(now);
+  $("effSide").innerHTML = active.length? `<div class="muted" style="font-size:12px">Strength now</div><div style="font-size:22px;font-weight:700">${Math.round(Math.min(v,1.5)*100)}%</div>` : "";
+
+  // chart
+  if(!relevant.length && !cafs.length){ $("chartBox").innerHTML=""; $("legend").style.display="none"; $("sleepCheck").innerHTML=""; }
+  else { $("legend").style.display="flex"; $("chartBox").innerHTML=chartSVG(now, relevant, cafs); }
+
+  // sleep check
+  let sc="";
+  if(relevant.length && endAll>now-1*H){
+    const bed=bedAfter(Math.max(now, relevant[0].t));
+    if(endAll<=bed-60*M) sc+=`<div class="check" style="color:var(--ok)">✓ Wears off ${dur(bed-endAll)} before bed (${S.settings.bedtime})</div>`;
+    else if(endAll<=bed) sc+=`<div class="check" style="color:var(--wear)">⚠ Wears off close to bedtime (${S.settings.bedtime})</div>`;
+    else sc+=`<div class="check" style="color:var(--danger)">⚠ Still active at bedtime: until ~${fmt(endAll)}</div>`;
+  }
+  if(cafs.length){ const bed=bedAfter(now), cb=cafAt(bed); if(cb>=40) sc+=`<div class="check" style="color:var(--caf)">☕ ~${Math.round(cb)} mg caffeine still in your system at bedtime</div>`; }
+  $("sleepCheck").innerHTML=sc;
+
+  // dose list
+  const list=S.doses.filter(d=>(d.prof.nonstim? now-d.t<D : endOf(d)+2*H>now)).sort((a,b)=>a.t-b.t);
+  $("doseList").innerHTML=list.map(d=>{
+    const ph=d.prof.nonstim? {k:"All-day", c:"var(--steady)"} : phaseAt(d, now);
+    return `<div class="dose-row"><span class="dot" style="background:${ph.c}"></span>
+      <div class="grow"><b>${esc(shortName(d))} ${d.mg} mg</b> <small>· ${fmt(d.t)}${d.prof.nonstim?"":" → "+fmt(endOf(d))}${d.adj?` · ${adjLabel(d.adj)}`:""}</small><br><small style="color:${ph.c==="var(--off)"?"var(--muted)":ph.c}">${ph.k}</small></div>
+      <button class="small ghost" data-rmdose="${d.id}">Remove</button></div>`;
+  }).join("");
+}
+
+function chartSVG(now, doses, cafs){
+  const W=640, Hh=200, top=22, base=160;
+  let start=Math.min(now, ...doses.map(d=>d.t), ...cafs.map(c=>c.t)) - .5*H;
+  let end=Math.max(now+1.5*H, ...doses.map(d=>endOf(d)+1.5*H), ...cafs.map(c=>c.t+4*H));
+  const bed=bedAfter(Math.max(now, start+H));
+  if(bed>start && bed<start+20*H) end=Math.max(end, bed+.5*H);
+  if(end-start>20*H) start=end-20*H;
+  const span=end-start, N=220;
+  const X=t=>((t-start)/span)*W;
+  let maxE=1.15; const pts=[], cpts=[];
+  for(let i=0;i<=N;i++){ const t=start+span*i/N; const e=doses.reduce((s,d)=>s+intensity(d.prof,(t-d.t)/H),0); const c=cafAt(t)/200; pts.push([t,e]); cpts.push([t,c]); maxE=Math.max(maxE,e*1.08,c*1.08); }
+  const Y=v=>base-(v/maxE)*(base-top);
+  const line=pts.map(([t,v],i)=>`${i?"L":"M"}${X(t).toFixed(1)},${Y(v).toFixed(1)}`).join("");
+  const area=`${line}L${W},${base}L0,${base}Z`;
+  const hasCaf=cpts.some(p=>p[1]>.02);
+  const cline=cpts.map(([t,v],i)=>`${i?"L":"M"}${X(t).toFixed(1)},${Y(v).toFixed(1)}`).join("");
+  // hour ticks
+  let ticks=""; const step=span>12*H?3:span>6*H?2:1; const d0=new Date(start); d0.setMinutes(0,0,0);
+  for(let t=d0.getTime()+H; t<end; t+=H){ const h=new Date(t).getHours(); if(h%step) continue; const x=X(t);
+    ticks+=`<line x1="${x}" y1="${top-4}" x2="${x}" y2="${base}" stroke="#262b35" stroke-width="1"/><text x="${x}" y="${base+16}" fill="#8b93a5" font-size="11" text-anchor="middle">${pad(h)}:00</text>`; }
+  // peak band for each dose
+  let marks="";
+  doses.forEach((d,i)=>{ const x=X(d.t); marks+=`<circle cx="${x}" cy="${base}" r="5" fill="#7c9cff" stroke="#0f1115" stroke-width="2"/><text x="${x}" y="${base+32}" fill="#c9d3ff" font-size="10.5" text-anchor="middle">💊 ${esc(shortName(d)).slice(0,14)}</text>`; });
+  cafs.forEach(c=>{ const x=X(c.t); marks+=`<circle cx="${x}" cy="${base}" r="4" fill="#d9a066" stroke="#0f1115" stroke-width="2"/>`; });
+  let bedM="";
+  if(bed>start && bed<end){ const x=X(bed); bedM=`<line x1="${x}" y1="${top-6}" x2="${x}" y2="${base}" stroke="#b48cff" stroke-width="1.5" stroke-dasharray="4 4"/><text x="${x-4}" y="${top+4}" fill="#b48cff" font-size="11" text-anchor="end">bed ${S.settings.bedtime}</text>`; }
+  const nx=X(now);
+  const nowM=(now>=start&&now<=end)?`<line x1="${nx}" y1="${top-8}" x2="${nx}" y2="${base}" stroke="#fff" stroke-width="2"/><circle cx="${nx}" cy="${Y(effectAt(now)>0?doses.reduce((s,d)=>s+intensity(d.prof,(now-d.t)/H),0):0)}" r="5" fill="#fff"/><text x="${nx+5}" y="${top-10}" fill="#fff" font-size="11">now</text>`:"";
+  return `<svg class="chart" viewBox="0 -6 ${W} ${Hh+12}" role="img" aria-label="Effect over the day">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8f7cff" stop-opacity=".55"/><stop offset="1" stop-color="#7c9cff" stop-opacity=".03"/></linearGradient></defs>
+    ${ticks}<line x1="0" y1="${base}" x2="${W}" y2="${base}" stroke="#2a2f3a"/>
+    <path d="${area}" fill="url(#g)"/><path d="${line}" fill="none" stroke="#9fb3ff" stroke-width="2.5" stroke-linejoin="round"/>
+    ${hasCaf?`<path d="${cline}" fill="none" stroke="#d9a066" stroke-width="2" stroke-dasharray="5 4"/>`:""}
+    ${bedM}${marks}${nowM}</svg>`;
+}
+
+/* check-in */
+let ciDraft={};
+function pendingCheckin(now){
+  return stim().filter(d=>now>=d.t+(d.prof.dur-.75)*H && now-d.t<36*H && !S.checkins[d.id] && !S.skipped[d.id]).sort((a,b)=>a.t-b.t)[0];
+}
+function renderCheckin(now){
+  const d=pendingCheckin(now), card=$("checkinCard");
+  if(!d){ card.style.display="none"; return; }
+  if(ciDraft.id!==d.id) ciDraft={id:d.id};
+  card.style.display="block";
+  const chip=(field,val,label)=>`<button type="button" class="chip ${ciDraft[field]===val?"on":""}" data-ci="${field}" data-val="${val}">${label}</button>`;
+  const amt = (ciDraft.when==="early"||ciDraft.when==="late") ? `<div class="q">By about how much?</div><div class="chips">${[.5,1,1.5,2,3].map(h=>chip("amt",h, h<1?"30 min":h+" h")).join("")}</div>` : "";
+  card.innerHTML=`<h2>📝 Quick check-in</h2>
+    <div style="font-size:16px;font-weight:600">How did ${esc(shortName(d))} ${d.mg} mg go?</div>
+    <div class="muted" style="font-size:13px">Taken ${fmt(d.t)} · predicted to wear off ~${fmt(endOf(d))}</div>
+    <div class="q">It wore off…</div>
+    <div class="chips">${chip("when","early","Earlier")}${chip("when","right","About then")}${chip("when","late","Later")}</div>
+    ${amt}
+    ${Object.entries(FEEL).map(([f,o])=>`<div class="q">${o.q}</div><div class="chips">${o.opts.map(([v,l])=>chip(f,v,l)).join("")}</div>`).join("")}
+    <div class="row" style="margin-top:16px"><button class="primary" id="ciSave">Save</button><button class="ghost" id="ciSkip">Skip</button></div>`;
+  card.querySelectorAll("[data-ci]").forEach(b=>b.onclick=()=>{ const f=b.dataset.ci; let v=b.dataset.val; if(f==="amt") v=+v; ciDraft[f]= ciDraft[f]===v? undefined : v; renderCheckin(Date.now()); });
+  $("ciSave").onclick=()=>{
+    let offset=null;
+    if(ciDraft.when==="right") offset=0;
+    else if(ciDraft.when==="early"||ciDraft.when==="late") offset=(ciDraft.amt||1)*(ciDraft.when==="early"?-1:1);
+    S.checkins[d.id]={offset, focus:ciDraft.focus||null, appetite:ciDraft.appetite||null, crash:ciDraft.crash||null, jitter:ciDraft.jitter||null, at:Date.now()};
+    const r=remindersAll().find(r=>r.id===`${d.id}-checkin-10`); if(r) S.done[r.id]=1;
+    save(); render();
+    const L=learned(d.key);
+    toast("📝","Check-in saved", L? `Next time, ${d.prof.short} will be timed for you (${adjLabel(L.adj)}, from ${L.n} check-in${L.n>1?"s":""}).` : "Thanks! The more you log, the better the timer fits you.");
+  };
+  $("ciSkip").onclick=()=>{ S.skipped[d.id]=1; const r=`${d.id}-checkin-10`; S.done[r]=1; save(); render(); };
+}
+
+function renderReminders(now){
+  const box=$("reminders"); box.innerHTML="";
+  let rs=remindersAll().filter(r=>r.t > now-(showDone?8:2)*H);
+  if(!showDone) rs=rs.filter(r=>!S.done[r.id]);
+  if(!rs.length){ box.innerHTML=`<div class="empty">${S.doses.length?"All caught up 🎉":"Reminders appear here once you log a dose."}</div>`; return; }
+  const limit=showMore?40:6;
+  for(const r of rs.slice(0,limit)){
+    const [ic,col]=ICON[r.kind]; const done=S.done[r.id];
+    const state = done?"done": r.t<=now ? (now-r.t>45*M?"missed":"due") : "";
+    const row=document.createElement("div"); row.className="rem "+state;
+    row.innerHTML=`<div class="ico" style="background:color-mix(in srgb, ${col} 18%, transparent)">${ic}</div><div class="t">${fmt(r.t)}</div>
+      <div class="txt"><b>${esc(r.title)}</b><span>${state==="due"?"Now · ":state==="missed"?"Missed · ":r.t>now?`in ${dur(r.t-now)} · `:""}${esc(r.sub)}</span></div>`;
+    const b=document.createElement("button"); b.className="small"+(done?" ghost":"");
+    if(r.kind==="checkin" && !done){ b.textContent="Log"; b.onclick=()=>{ $("checkinCard").scrollIntoView({block:"center"}); }; if(r.t>now) b.disabled=true; }
+    else { b.textContent=done?"Undo":"Done"; b.onclick=()=>{ if(done){ delete S.done[r.id]; save(); render(); } else markDone(r); }; }
+    row.appendChild(b); box.appendChild(row);
+  }
+  if(rs.length>6){ const m=document.createElement("button"); m.className="link"; m.style.marginTop="10px";
+    m.textContent=showMore?"Show fewer":`Show ${rs.length-6} more`; m.onclick=()=>{ showMore=!showMore; render(); }; box.appendChild(m); }
+}
+
+/* ============================================================ history */
+function dayData(k){
+  const doses=S.doses.filter(d=>dayKey(d.t)===k).sort((a,b)=>a.t-b.t);
+  const caf=S.caffeine.filter(c=>dayKey(c.t)===k);
+  return {doses, caf, cafMg:caf.reduce((a,c)=>a+c.mg,0), water:S.water[k]||0, checks:doses.map(d=>S.checkins[d.id]).filter(Boolean)};
+}
+function renderHistory(){
+  const now=new Date();
+  if(!calMonth) calMonth=new Date(now.getFullYear(), now.getMonth(), 1);
+  if(!selDay) selDay=today();
+  $("calTitle").textContent=calMonth.toLocaleDateString([], {month:"long", year:"numeric"});
+  const first=new Date(calMonth), startDow=(first.getDay()+6)%7, days=new Date(first.getFullYear(), first.getMonth()+1, 0).getDate();
+  let h=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>`<div class="hd">${d}</div>`).join("");
+  for(let i=0;i<startDow;i++) h+=`<div class="day out"></div>`;
+  for(let dd=1; dd<=days; dd++){
+    const k=`${first.getFullYear()}-${pad(first.getMonth()+1)}-${pad(dd)}`, dt=dayData(k);
+    const f=dt.checks.map(c=>c.focus).filter(Boolean);
+    const fc= f.includes("meh")?"var(--danger)": f.includes("ok")?"var(--mid)": f.includes("good")?"var(--ok)":"";
+    h+=`<button class="day ${dt.doses.length?"took":""} ${k===today()?"today":""} ${k===selDay?"sel":""}" data-day="${k}">${dd}${fc?`<span class="fd" style="background:${fc}"></span>`:""}${dt.water?`<span class="wn">💧${dt.water}</span>`:""}</button>`;
+  }
+  $("cal").innerHTML=h;
+
+  // day detail
+  const dt=dayData(selDay), label=new Date(selDay+"T12:00").toLocaleDateString([], {weekday:"long", day:"numeric", month:"long"});
+  let det=`<h2>${esc(label)}</h2>`;
+  if(!dt.doses.length && !dt.water && !dt.caf.length) det+=`<div class="empty">Nothing logged that day.</div>`;
+  for(const d of dt.doses){
+    const c=S.checkins[d.id];
+    let feel="";
+    if(c){ const bits=[]; if(c.offset!=null) bits.push(c.offset===0?"wore off on time":`wore off ${Math.abs(c.offset)} h ${c.offset<0?"early":"late"}`);
+      for(const [f,o] of Object.entries(FEEL)) if(c[f]) bits.push(`${o.q.toLowerCase()}: ${o.opts.find(x=>x[0]===c[f])?.[1].toLowerCase()}`); feel=bits.join(" · "); }
+    det+=`<div class="detail-item"><span><b>${fmt(d.t)}</b> ${esc(shortName(d))} ${d.mg} mg${feel?`<br><small class="muted">${esc(feel)}</small>`:""}</span><span class="muted" style="font-size:13px">${d.prof.nonstim?"":"→ "+fmt(endOf(d))}</span></div>`;
+  }
+  if(dt.water||dt.caf.length) det+=`<div class="detail-item"><span>💧 ${dt.water} glass${dt.water===1?"":"es"} of water</span><span>☕ ${dt.cafMg} mg caffeine</span></div>`;
+  $("dayDetail").innerHTML=det;
+
+  // stats (last 7 days)
+  const keys=[...Array(7)].map((_,i)=>dayKey(Date.now()-i*D)), dd=keys.map(dayData);
+  const took=dd.filter(x=>x.doses.length).length;
+  const avgW=(dd.reduce((a,x)=>a+x.water,0)/7).toFixed(1), avgC=Math.round(dd.reduce((a,x)=>a+x.cafMg,0)/7);
+  const checks=dd.flatMap(x=>x.checks);
+  $("stats").innerHTML=[[`${took}/7`,"days with meds"],[avgW,"glasses of water / day"],[avgC,"mg caffeine / day"],[checks.length,"check-ins"]].map(([b,s])=>`<div class="stat"><b>${b}</b><span>${s}</span></div>`).join("");
+  const pat=[];
+  const cnt=(f,v)=>checks.filter(c=>c[f]===v).length;
+  if(checks.length>=2){
+    if(cnt("appetite","none")+cnt("appetite","low")>=Math.ceil(checks.length/2)) pat.push("🍽️ Your appetite is usually low or gone. Lunch reminders matter: even a smoothie or yogurt counts.");
+    if(cnt("crash","rough")>=2) pat.push("🌇 Rough comedowns came up more than once. A real meal + water before it wears off can soften it; worth mentioning to your doctor if it keeps happening.");
+    if(cnt("jitter","lot")+cnt("jitter","some")>=Math.ceil(checks.length/2)) pat.push(`⚡ Jitters show up often${avgC>150?`, and you average ${avgC} mg caffeine a day. Try cutting back and see if it helps`:""}.`);
+    if(cnt("focus","good")>=Math.ceil(checks.length*.7)) pat.push("🎯 Focus has been good on most days.");
+  }
+  if(+avgW<5 && took) pat.push(`💧 You're averaging ${avgW} glasses a day. Try shorter water reminders in Settings.`);
+  $("patterns").innerHTML=pat.map(p=>`<div class="hint" style="font-size:13.5px;color:var(--text)">${esc(p)}</div>`).join("") || `<div class="hint">Patterns appear here after a few check-ins.</div>`;
+
+  // learned
+  const usedKeys=[...new Set(S.doses.map(d=>d.key))].filter(k=>MEDS[k] && !MEDS[k].nonstim);
+  $("learned").innerHTML = usedKeys.length? usedKeys.map(k=>{ const L=learned(k), m=MEDS[k];
+    return `<div class="detail-item"><span>${esc(m.short)}</span><span class="muted">${L?`lasts ~${(m.dur+L.adj).toFixed(1).replace(".0","")} h for you (${adjLabel(L.adj)}, ${L.n} check-in${L.n>1?"s":""})`:`label: ${m.range} · no check-ins yet`}</span></div>`; }).join("") : `<div class="empty">Log doses and do the quick check-ins: the timer will adapt to how long your med really lasts.</div>`;
+}
+$("calPrev").onclick=()=>{ calMonth=new Date(calMonth.getFullYear(), calMonth.getMonth()-1, 1); renderHistory(); };
+$("calNext").onclick=()=>{ calMonth=new Date(calMonth.getFullYear(), calMonth.getMonth()+1, 1); renderHistory(); };
+
+function csv(){
+  const rows=[["date","time","medication","dose_mg","predicted_hours","wore_off_vs_prediction_h","focus","appetite","comedown","jitters","water_glasses_that_day","caffeine_mg_that_day"]];
+  for(const d of S.doses.slice().sort((a,b)=>a.t-b.t)){
+    const k=dayKey(d.t), c=S.checkins[d.id]||{}, dt=dayData(k);
+    rows.push([k, fmt(d.t), d.prof.name, d.mg, d.prof.nonstim?"":d.prof.dur, c.offset??"", c.focus||"", c.appetite||"", c.crash||"", c.jitter||"", dt.water, dt.cafMg]);
+  }
+  return rows.map(r=>r.map(v=>{ v=String(v); return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v; }).join(",")).join("\n");
+}
+$("exportBtn").onclick=async()=>{
+  try{
+    const dl = window.claude && claude.use ? await claude.use("downloads") : null;
+    if(!dl) throw 0;
+    await dl.save({filename:`medtimer-history-${today()}.csv`, data:csv()});
+  }catch(e){ copyCsv(); }
 };
+async function copyCsv(){ try{ await navigator.clipboard.writeText(csv()); toast("📋","Copied","Paste it into an email, a note, or a spreadsheet."); }catch(e){ toast("⚠️","Couldn't copy","Your browser blocked the clipboard here."); } }
+$("copyBtn").onclick=copyCsv;
 
-/* ---------- water ---------- */
-function addWater(n, silent){ const k=today(); S.water[k]=Math.max(0,(S.water[k]||0)+n); save(); if(!silent) render(); }
-$("waterPlus").onclick=()=>{ addWater(1);
-  const r=allReminders().find(r=>r.kind==="water" && !S.done[r.id] && Math.abs(r.t-Date.now())<30*M); if(r){S.done[r.id]=1; save(); render();} };
-$("waterMinus").onclick=()=>addWater(-1);
-
-/* ---------- settings ---------- */
-$("waterInt").value=S.settings.water; $("sound").value=S.settings.sound; $("ateFirst").value=S.settings.ateFirst;
+/* ============================================================ settings */
+function renderSettings(){
+  $("waterInt").value=S.settings.water; $("sound").value=S.settings.sound; $("ateFirst").value=S.settings.ateFirst;
+  $("bedtime").value=S.settings.bedtime; $("refillDays").value=S.settings.refillDays;
+  const keys=[...new Set([S.lastMed, ...S.doses.map(d=>d.key), ...Object.keys(S.pills)])].filter(k=>k && MEDS[k] && k!=="custom");
+  $("stockList").innerHTML = keys.length ? keys.map(k=>{
+    const p=S.pills[k]||{}, si=stockInfo(k);
+    return `<div class="stock"><div class="row between"><b>${esc(MEDS[k].short)}</b><span class="muted" style="font-size:13px">${si?`~${si.days} day${si.days===1?"":"s"} left`:"not tracked"}</span></div>
+      <div class="row" style="margin-top:8px">
+        <div><label>Pills left</label><input type="number" min="0" inputmode="numeric" data-stock="${k}" data-f="count" value="${p.count??""}" placeholder="—"></div>
+        <div><label>Pills per dose</label><input type="number" min="1" inputmode="numeric" data-stock="${k}" data-f="perDose" value="${p.perDose||1}"></div>
+        <div><label>Box size</label><input type="number" min="1" inputmode="numeric" data-stock="${k}" data-f="box" value="${p.box||28}"></div>
+        <div style="align-self:flex-end"><button class="small" data-refill="${k}">+ New box</button></div>
+      </div></div>`; }).join("") : `<div class="empty">Log a dose first, then you can track how many pills you have left.</div>`;
+}
 $("waterInt").onchange=e=>{ S.settings.water=+e.target.value; save(); render(); };
 $("sound").onchange=e=>{ S.settings.sound=+e.target.value; save(); };
 $("ateFirst").onchange=e=>{ S.settings.ateFirst=+e.target.value; save(); render(); };
+$("bedtime").onchange=e=>{ if(e.target.value){ S.settings.bedtime=e.target.value; save(); render(); } };
+$("refillDays").onchange=e=>{ S.settings.refillDays=+e.target.value; save(); render(); };
+$("clearBtn").onclick=()=>ask("Delete all data?","This removes every dose, check-in, and setting"+(syncState==="synced"?" on all your devices":"")+". It can't be undone.","Delete",()=>{ S=blank(); FIRED={}; saveFired(); save(); render(); });
 
-/* ---------- native (Android) ---------- */
+/* ============================================================ delegated clicks */
+document.addEventListener("click", e=>{
+  const t=e.target.closest("[data-rmdose],[data-rmcaf],[data-day],[data-refill],[data-caf]"); if(!t) return;
+  if(t.dataset.rmdose) removeDose(t.dataset.rmdose);
+  else if(t.dataset.rmcaf){ S.caffeine=S.caffeine.filter(c=>c.id!==t.dataset.rmcaf); save(); render(); }
+  else if(t.dataset.day){ selDay=t.dataset.day; renderHistory(); }
+  else if(t.dataset.refill){ const k=t.dataset.refill, p=S.pills[k]=S.pills[k]||{perDose:1, box:28}; p.count=(+p.count||0)+(+p.box||28); save(); render(); toast("💊","Box added",`${MEDS[k].short}: ${p.count} pills now.`); }
+  else if(t.dataset.caf){ const c=CAF[+t.dataset.caf]; addCaffeine(c.mg, c.l); }
+});
+document.addEventListener("change", e=>{
+  const t=e.target; if(!t.dataset || !t.dataset.stock) return;
+  const k=t.dataset.stock, p=S.pills[k]=S.pills[k]||{perDose:1, box:28};
+  const v=t.value===""? (t.dataset.f==="count"? null : undefined) : Math.max(0,+t.value);
+  if(v===undefined) return;
+  p[t.dataset.f]=v; save(); render();
+});
+$("cafBtns").innerHTML=CAF.map((c,i)=>`<button data-caf="${i}">${c.l}<small>${c.mg} mg</small></button>`).join("");
+$("cafAdd").onclick=()=>{ addCaffeine($("cafCustom").value,"Caffeine"); $("cafCustom").value=""; };
+$("waterPlus").onclick=()=>addWater(1);
+$("waterMinus").onclick=()=>addWater(-1);
+$("showAllBtn").onclick=e=>{ showDone=!showDone; e.target.textContent=showDone?"Hide done":"Show done"; render(); };
+
+/* ============================================================ views (hash) */
+let curView="today";
+function route(){
+  const v=(location.hash||"#today").slice(1); curView=["today","history","settings"].includes(v)?v:"today";
+  document.querySelectorAll(".view").forEach(s=>s.classList.toggle("on", s.id==="v-"+curView));
+  document.querySelectorAll(".tabs a").forEach(a=>a.classList.toggle("on", a.dataset.v===curView));
+  render();
+}
+window.addEventListener("hashchange", route);
+
+/* ============================================================ dialog & toast */
+function ask(title, text, yes, onYes){
+  $("dlgT").textContent=title; $("dlgP").textContent=text; $("dlgYes").textContent=yes||"OK";
+  $("dlg").classList.add("on");
+  $("dlgYes").onclick=()=>{ $("dlg").classList.remove("on"); onYes&&onYes(); };
+  $("dlgNo").onclick=()=>$("dlg").classList.remove("on");
+}
+function toast(ic,title,sub,rem){
+  const t=document.createElement("div"); t.className="toast";
+  t.innerHTML=`<div class="ico">${ic}</div><div style="flex:1"><b>${esc(title)}</b><span>${esc(sub)}</span>${rem?`<div class="row"></div>`:""}</div>`;
+  if(rem){
+    const row=t.querySelector(".row");
+    const d=document.createElement("button"); d.className="small primary"; d.textContent=rem.kind==="checkin"?"Log it":"Done";
+    d.onclick=()=>{ if(rem.kind==="checkin"){ location.hash="#today"; setTimeout(()=>$("checkinCard").scrollIntoView({block:"center"}),50); } else markDone(rem); t.remove(); };
+    const s=document.createElement("button"); s.className="small"; s.textContent="Snooze 10 min";
+    s.onclick=()=>{ S.snooze[rem.id]=Date.now()+10*M; save(); render(); t.remove(); };
+    row.append(d,s);
+    setTimeout(()=>t.remove(), 5*60e3);
+  } else setTimeout(()=>t.remove(),7000);
+  $("toasts").appendChild(t);
+}
+
+/* ============================================================ alerts (web) */
+let actx=null;
+function unlockAudio(){ try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended") actx.resume(); }catch(e){} }
+document.addEventListener("pointerdown", unlockAudio, {once:true});
+function beep(){
+  if(!+S.settings.sound||!actx) return;
+  try{ [0,.18].forEach((o,i)=>{ const os=actx.createOscillator(), g=actx.createGain(); os.type="sine"; os.frequency.value=i?880:660;
+    g.gain.setValueAtTime(.0001,actx.currentTime+o); g.gain.exponentialRampToValueAtTime(.18,actx.currentTime+o+.02); g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+o+.25);
+    os.connect(g).connect(actx.destination); os.start(actx.currentTime+o); os.stop(actx.currentTime+o+.3); }); }catch(e){}
+}
+$("notifBtn").onclick=async()=>{
+  unlockAudio(); beep();
+  try{
+    if(!("Notification" in window)) throw 0;
+    const p=await Notification.requestPermission();
+    if(p!=="granted") throw 0;
+    $("notifBtn").textContent="🔔 On"; new Notification("MedTimer",{body:"System notifications are on."});
+  }catch(e){ $("notifBtn").textContent="🔔 Sound + pop-ups"; toast("🔔","Alerts are on in this page","Your browser blocked system notifications here, so reminders show as pop-ups with a sound. Keep this tab open."); }
+};
+function tick(){
+  const now=Date.now();
+  if(!NATIVE){
+    for(const r of remindersAll()){
+      if(S.done[r.id]) continue;
+      const key=r.id+"@"+Math.round(r.t);
+      if(r.t<=now && now-r.t<30*M && !FIRED[key]){
+        FIRED[key]=1; saveFired();
+        toast(ICON[r.kind][0], r.title, r.sub, r); beep();
+        try{ if(window.Notification && Notification.permission==="granted") new Notification(`${ICON[r.kind][0]} ${r.title}`, {body:r.sub}); }catch(e){}
+      }
+    }
+  }
+  render();
+}
+
+/* ============================================================ native (Android app) */
 let lastSync="";
 function syncNative(){
   if(!NATIVE) return;
   const now=Date.now();
-  const list=allReminders().filter(r=>!S.done[r.id] && r.t>now && r.t-now<36*H)
+  const list=remindersAll().filter(r=>!S.done[r.id] && r.t>now && r.t-now<36*H)
     .map(r=>({id:r.id, t:Math.round(r.t), title:`${ICON[r.kind][0]} ${r.title}`, body:r.sub}));
   const j=JSON.stringify(list);
   if(j!==lastSync){ lastSync=j; try{ Android.schedule(j); }catch(e){} }
-}
-function nativeStatus(){
-  if(!NATIVE) return;
-  let st={notif:true, exact:true}; try{ st=JSON.parse(Android.status()); }catch(e){}
-  $("notifBtn").textContent = st.notif ? "🔔 Notifications on" : "🔕 Turn on notifications";
-  $("notifBtn").classList.toggle("primary", !st.notif);
-  $("exactWarn").style.display = st.exact ? "none" : "block";
 }
 window.onAppResume=function(){
   if(!NATIVE) return;
   try{
     const ev=JSON.parse(Android.pullEvents()||"[]");
     for(const e of ev){
-      if(e.type==="done"){ if(!S.done[e.id]){ S.done[e.id]=1; if(e.id.includes("-water-")) addWater(1,true); } }
-      if(e.type==="snooze"){ S.snooze[e.id]=e.t; }
+      if(e.type==="done" && !S.done[e.id]){ S.done[e.id]=1; if(e.id.includes("-water-")) S.water[today()]=(S.water[today()]||0)+1; }
+      if(e.type==="snooze") S.snooze[e.id]=e.t;
     }
     if(ev.length) save();
   }catch(e){}
-  nativeStatus(); render();
+  try{ const st=JSON.parse(Android.status()); $("nNotifBtn").textContent=st.notif?"🔔 On":"🔕 Turn on"; }catch(e){}
+  render();
 };
 
-/* ---------- alerts ---------- */
-let actx=null;
-function unlockAudio(){ try{ if(!actx){ actx=new (window.AudioContext||window.webkitAudioContext)(); } if(actx.state==="suspended") actx.resume(); }catch(e){} }
-document.addEventListener("pointerdown", unlockAudio, {once:true});
-function beep(){
-  if(!S.settings.sound||!actx) return;
-  try{ [0,0.18].forEach((o,i)=>{ const os=actx.createOscillator(), g=actx.createGain(); os.type="sine"; os.frequency.value=i?880:660;
-    g.gain.setValueAtTime(0.0001,actx.currentTime+o); g.gain.exponentialRampToValueAtTime(0.18,actx.currentTime+o+0.02); g.gain.exponentialRampToValueAtTime(0.0001,actx.currentTime+o+0.25);
-    os.connect(g).connect(actx.destination); os.start(actx.currentTime+o); os.stop(actx.currentTime+o+0.3); }); }catch(e){}
-}
-$("notifBtn").onclick=async()=>{
-  if(NATIVE){ Android.requestNotif(); return; }
-  unlockAudio(); beep();
-  try{
-    if(!("Notification" in window)) throw 0;
-    const p = await Notification.requestPermission();
-    if(p==="granted"){ $("notifBtn").textContent="🔔 Alerts on"; new Notification("MedTimer", {body:"System notifications are on."}); }
-    else throw 0;
-  }catch(e){ $("notifBtn").textContent="🔔 Sound + pop-ups on"; toast("🔔","Alerts are on in this page","Your browser blocked system notifications here, so reminders show as pop-ups with a sound. Keep this tab open."); }
-};
-function toast(ic,title,sub,rem){
-  const t=document.createElement("div"); t.className="toast";
-  t.innerHTML=`<div class="ico">${ic}</div><div style="flex:1"><b>${title}</b><span>${sub}</span>${rem?`<div class="row"></div>`:""}</div>`;
-  if(rem){
-    const row=t.querySelector(".row");
-    const d=document.createElement("button"); d.className="small primary"; d.textContent="Done";
-    d.onclick=()=>{ S.done[rem.id]=1; if(rem.kind==="water") addWater(1,true); save(); render(); t.remove(); };
-    const s=document.createElement("button"); s.className="small"; s.textContent="Snooze 10 min";
-    s.onclick=()=>{ S.snooze[rem.id]=Date.now()+10*M; delete S.fired[rem.id]; save(); render(); t.remove(); };
-    row.append(d,s);
-  } else setTimeout(()=>t.remove(),6000);
-  $("toasts").appendChild(t);
-  if(rem) setTimeout(()=>t.remove(), 5*60e3);
-}
-function tick(){
-  const now=Date.now();
-  for(const r of allReminders()){
-    if(S.done[r.id]) continue;
-    const key=r.id+"@"+r.t;
-    if(!NATIVE && r.t<=now && now-r.t<30*M && !S.fired[key]){
-      S.fired[key]=1; save();
-      const [ic]=ICON[r.kind];
-      toast(ic, r.title, r.sub, r); beep();
-      try{ if(window.Notification && Notification.permission==="granted") new Notification(`${ic} ${r.title}`, {body:r.sub}); }catch(e){}
-    }
-  }
-  render();
-}
+/* ============================================================ start */
 if(NATIVE){
-  $("webNotice").style.display="none"; $("nativeBox").style.display="block";
+  $("webNotif").style.display="none"; $("nativeNotif").style.display="block";
+  $("notifHint").textContent="Reminders arrive as phone notifications, even with the app closed. Tap Done or Snooze right in the notification.";
+  $("nNotifBtn").onclick=()=>Android.requestNotif();
   $("testBtn").onclick=()=>{ Android.testNotif(); toast("🔔","Test sent","A notification should appear in about 5 seconds."); };
-  document.querySelector(".foot").insertAdjacentHTML("beforeend","");
-  window.onAppResume();
 }
-render(); setInterval(tick, 20e3); setTimeout(tick, 1500);
+setNow(); medInfo(); prune(); setSync("local");
+route();
+if(NATIVE) window.onAppResume();
+setInterval(tick, 20e3); setTimeout(tick, 1500);
+initSync();
 </script>
 </body>
 </html>
